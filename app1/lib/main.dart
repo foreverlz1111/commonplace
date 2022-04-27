@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:english_words/english_words.dart';
+import 'package:flutter/services.dart';
 //滑动的时候特别卡
 void main() {
-  runApp(const MainApp());
+  runApp(MaterialApp(home: MainApp()));
+  if (Platform.isAndroid) {
+    //设置Android状态栏透明
+    SystemUiOverlayStyle systemUiOverlayStyle =
+    const SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+    SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
+  }
 }
 
 class MainApp extends StatelessWidget {
   const MainApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
