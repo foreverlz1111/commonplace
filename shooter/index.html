@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+     body{
+	 margin:0;
+	 
+     }
+    </style>
+  </head>
+  <body id="bodyE">
+    <header>
+      <div class="text-3xl font-bold fixed text-white select-none" style="left:45%">
+	<span>得分:</span>
+	<span id ="scoreE">0</span>
+      </div>
+      <div class="text-2xl font-bold fixed select-none" style="left:60%;top:6%;visibility: hidden" id="scoreaE">+20</div>
+      <div class="text-5xl font-bold fixed text-purple-100 select-none" style="left:40%;top:20%;visibility: hidden" id="tipsE">难度提升！</div>
+    </header>
+    <main>
+      <div class="fixed inset-0 flex items-center justify-center select-none" id="startgamemodel">
+	<div class="bg-white max-w-md w-full p-6 text-center rounded-[12px]">
+	<h1 id="scorefinalE" class="text-4xl font-bold items-center leading-none">0</h1>
+	<p class="text-sm text-gray-900 mb-4">得分</p>
+	<div class="inset-0 items-stretch flex justify-center">
+	  <p id="highest_scoreE" class="text-sm text-gray-500 mb-4">最高得分 230</p>
+	  <button id="clearscorebtn" class="rounded-lg bg-slate-500 hover:bg-slate-600 text-white text-xs  ml-4 mb-4 px-2">重新记录</button>
+	</div>
+	
+	<div>
+	  <button class="bg-indigo-700 text-white w-full p-3 rounded-md hover:bg-indigo-500" id="startgamebtn">开始游戏</button>
+	</div>
+	<div>
+	  <button class="bg-rose-500 text-white w-full p-3 rounded-md hover:bg-rose -400 mt-1" id="infinitygamebtn">无尽模式</button>
+	</div>
+	</div>
+      </div>
+      <canvas id ="canvas"></canvas>
+    </main>
+    <footer>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js" integrity="sha512-VEBjfxWUOyzl0bAwh4gdLEaQyDYPvLrZql3pw1ifgb6fhEvZl9iDDehwHZ+dsMzA0Jfww8Xt7COSZuJ/slxc4Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+      <script type="text/javascript" src="./index.js"></script>
+    </footer>
+  </body>
+</html>
