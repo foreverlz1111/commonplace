@@ -21,9 +21,8 @@ function App() {
     );
 }
 
-function List() {
-    console.log("key:", Math.random())
-    return people.map((p) =>
+function Item({p}) {
+    return (
         <li key={p.id}>
             <img src={getImageUrl(p)}
                  alt={p.name}></img>
@@ -33,6 +32,20 @@ function List() {
                 known for {p.accomplishment}
             </p>
         </li>
+    )
+}
+
+function List() {
+    console.log("key:", Math.random())
+    const chemists = people.filter(p => p.profession === "chemist")
+    const others = people.filter(p => p.profession !== "chemist")
+    return (
+        [
+            chemists.map(chemist =>
+                <Item key={Math.random()} p={chemist}></Item>),
+            others.map(other =>
+                <Item key={Math.random()} p={other}></Item>)
+        ]
     )
 }
 
