@@ -59,14 +59,13 @@ const poem = {
 };
 
 function Poem() {
+    const p = poem.lines.map((line, index) =>
+        [<p key={index}>{line}</p>,
+            index === (poem.lines.length - 1) ? "" : <hr key={Math.random()}/>]
+    )
     return (
-        <article>
-            {poem.lines.map((line, index) =>
-                <>
-                    <p key={index}>{line}</p>
-                    {index === (poem.lines.length - 1) ? "" : <hr/>}
-                </>
-            )}
+        <article key={Math.random()}>
+            {p}
         </article>
     )
 }
