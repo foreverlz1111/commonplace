@@ -14,8 +14,9 @@ function App() {
                 >
                     Learn React
                 </a>
+                <Poem/>
+                <List/>
 
-                <List></List>
             </header>
         </div>
     );
@@ -46,6 +47,27 @@ function List() {
             others.map(other =>
                 <Item key={Math.random()} p={other}></Item>)
         ]
+    )
+}
+
+const poem = {
+    lines: [
+        'I write, erase, rewrite',
+        'Erase again, and then',
+        'A poppy blooms.',
+    ]
+};
+
+function Poem() {
+    return (
+        <article>
+            {poem.lines.map((line, index) =>
+                <>
+                    <p key={index}>{line}</p>
+                    {index === (poem.lines.length - 1) ? "" : <hr/>}
+                </>
+            )}
+        </article>
     )
 }
 
