@@ -14,7 +14,9 @@ function App() {
                     Learn React
                 </a>
 
+                <AddingA/>
                 <MoveDot/>
+
             </header>
         </div>
     );
@@ -47,9 +49,36 @@ function MoveDot() {
                 width: 20,
                 height: 20
             }}>
-
             </div>
         </div>
+    )
+}
+
+let nextId = 0
+
+function AddingA() {
+
+    const [name, setName] = useState("")
+    const [artists, setArtists] = useState([])
+    return (
+        <>
+            <h1>The List:</h1>
+            <input value={name}
+                   onChange={e => setName(e.target.value)}/>
+            <button onClick={() => {
+                setName("")
+                artists.push({
+                    id: nextId++,
+                    name: name
+                })
+            }
+            }><b>+</b></button>
+            <ul>
+                {artists.map(a =>
+                    <li key={a.id}>{a.name}</li>
+                )}
+            </ul>
+        </>
     )
 }
 
