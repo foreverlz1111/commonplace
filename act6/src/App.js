@@ -16,8 +16,9 @@ function App() {
 
                 <AddingA/>
                 <ShapeE/>
-                <MoveDot/>
+                <Counter/>
 
+                <MoveDot/>
             </header>
         </div>
     );
@@ -62,10 +63,14 @@ let initialArtists = [
     {id: 2, name: 'Louise Nevelson'},
 ]
 let initialShapes = [
-    { id: 0, type: 'circle', x: 50, y: 100 },
-    { id: 1, type: 'square', x: 150, y: 100 },
-    { id: 2, type: 'circle', x: 250, y: 100 },
+    {id: 0, type: 'circle', x: 50, y: 100},
+    {id: 1, type: 'square', x: 150, y: 100},
+    {id: 2, type: 'circle', x: 250, y: 100},
 ]
+let initialCounters = [
+    0, 0, 0
+]
+
 function AddingA() {
 
     const [name, setName] = useState("")
@@ -99,36 +104,69 @@ function AddingA() {
         </>
     )
 }
-function ShapeE(){
-    const [shapes,setShapes] = useState(initialShapes)
 
-    function handleClick(){
-        const nextShape = shapes.map(s =>{
-            if (s.type === "square"){
+function ShapeE() {
+    const [shapes, setShapes] = useState(initialShapes)
+
+    function handleClick() {
+        const nextShape = shapes.map(s => {
+            if (s.type === "square") {
                 return s
-            }else {
+            } else {
                 return {
                     ...s,
-                    y:s.y + 50
+                    y: s.y + 50
                 }
             }
         })
         setShapes(nextShape)
     }
-    return(
+
+    return (
         <>
-        <button onClick={handleClick}>⬇</button>
-            {shapes.map(s=>(
+            <button onClick={handleClick}>⬇</button>
+            {shapes.map(s => (
                 <div key={s.id}
-                style={{background:"purple",
-                position:"absolute",
-                left:s.x,
-                top:s.y,
-                borderRadius:s.type === "circle"?"50%":"",
-                width:20,
-                height:20}}></div>
+                     style={{
+                         background: "purple",
+                         position: "absolute",
+                         left: s.x,
+                         top: s.y,
+                         borderRadius: s.type === "circle" ? "50%" : "",
+                         width: 20,
+                         height: 20
+                     }}></div>
             ))}
         </>
     )
 }
+
+function Counter() {
+    const [counter, setCounter] = useState(initialCounters)
+
+    function handleIncreaseClick(index) {
+        const nextCounter = counter.map((c, i) => {
+            if (i === index) {
+                return c + 1
+            } else {
+                return c
+            }
+        })
+        setCounter(nextCounter)
+    }
+
+    return (
+        <ul>
+            {counter.map((counter, i) => (
+                <li key={i}>
+                    {counter}
+                    <button onClick={() => {
+                        handleIncreaseClick(i)
+                    }}><b>+</b></button>
+                </li>
+            ))}
+        </ul>
+    )
+}
+
 export default App;
