@@ -54,12 +54,18 @@ function MoveDot() {
     )
 }
 
-let nextId = 0
+
+let initialArtists = [
+    {id: 0, name: 'Marta Colvin Andrade'},
+    {id: 1, name: 'Lamidi Olonade Fakeye'},
+    {id: 2, name: 'Louise Nevelson'},
+];
 
 function AddingA() {
 
     const [name, setName] = useState("")
-    const [artists, setArtists] = useState([])
+    const [artists, setArtists] = useState(initialArtists)
+    // let nextId = artists.length
     return (
         <>
             <h1>The List:</h1>
@@ -67,15 +73,22 @@ function AddingA() {
                    onChange={e => setName(e.target.value)}/>
             <button onClick={() => {
                 setName("")
-                artists.push({
-                    id: nextId++,
-                    name: name
-                })
+                setArtists([
+                    {id: Math.random(), name: name},
+                    ...artists
+                ])
             }
             }><b>+</b></button>
             <ul>
-                {artists.map(a =>
-                    <li key={a.id}>{a.name}</li>
+                {artists.map(artist =>
+                    <li key={artist.id}>{artist.name}
+                        <button onClick={() => {
+                            setArtists(
+                                artists.filter(a => a.id !== artist.id)
+                            )
+                        }
+                        }><b>-</b></button>
+                    </li>
                 )}
             </ul>
         </>
