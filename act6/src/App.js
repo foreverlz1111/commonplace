@@ -15,6 +15,7 @@ function App() {
                 </a>
 
                 <AddingA/>
+                <ShapeE/>
                 <MoveDot/>
 
             </header>
@@ -59,8 +60,12 @@ let initialArtists = [
     {id: 0, name: 'Marta Colvin Andrade'},
     {id: 1, name: 'Lamidi Olonade Fakeye'},
     {id: 2, name: 'Louise Nevelson'},
-];
-
+]
+let initialShapes = [
+    { id: 0, type: 'circle', x: 50, y: 100 },
+    { id: 1, type: 'square', x: 150, y: 100 },
+    { id: 2, type: 'circle', x: 250, y: 100 },
+]
 function AddingA() {
 
     const [name, setName] = useState("")
@@ -94,5 +99,36 @@ function AddingA() {
         </>
     )
 }
+function ShapeE(){
+    const [shapes,setShapes] = useState(initialShapes)
 
+    function handleClick(){
+        const nextShape = shapes.map(s =>{
+            if (s.type === "square"){
+                return s
+            }else {
+                return {
+                    ...s,
+                    y:s.y + 50
+                }
+            }
+        })
+        setShapes(nextShape)
+    }
+    return(
+        <>
+        <button onClick={handleClick}>⬇</button>
+            {shapes.map(s=>(
+                <div key={s.id}
+                style={{background:"purple",
+                position:"absolute",
+                left:s.x,
+                top:s.y,
+                borderRadius:s.type === "circle"?"50%":"",
+                width:20,
+                height:20}}></div>
+            ))}
+        </>
+    )
+}
 export default App;
