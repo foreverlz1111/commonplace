@@ -1,5 +1,8 @@
 import './App.css';
 import {useState} from "react";
+import TasksProvider from "./TasksContext";
+import AddTask from "./AddTask";
+import TaskList from "./TaskList";
 
 function App() {
     return (
@@ -13,7 +16,7 @@ function App() {
                 >
                     Learn React
                 </a>
-
+                <Task/>
                 <Form/>
                 <Accordion/>
             </header>
@@ -48,11 +51,14 @@ function Form() {
 
     return (
         <>
-            <h2>Input opt</h2>
+            <h2>Input "opt" :</h2>
             <form onSubmit={handleSubmit}>
-                <textarea value={answer}
-                          onChange={handleTextareaChange}
-                          disabled={status === "submitting"}/>
+
+                <textarea
+                    placeholder="opt"
+                    value={answer}
+                    onChange={handleTextareaChange}
+                    disabled={status === "submitting"}/>
                 <br/>
                 <button disabled={answer.length === 0 || status === "submitting"}>submit</button>
                 {error != null && <p>{error.message}</p>}
@@ -73,6 +79,7 @@ function submitForm(answer) {
         }, 500)
     })
 }
+
 function Accordion() {
     const [activeIndex, setActiveIndex] = useState(0);
     return (
@@ -83,14 +90,18 @@ function Accordion() {
                 isActive={activeIndex === 0}
                 onShow={() => setActiveIndex(0)}
             >
-                With a population of about 2 million, Almaty is Kazakhstan's largest city. From 1929 to 1997, it was its capital city.
+                With a population of about 2 million, Almaty is Kazakhstan's largest city. From 1929 to 1997, it was its
+                capital city.
             </Panel>
             <Panel
                 title="Etymology"
                 isActive={activeIndex === 1}
                 onShow={() => setActiveIndex(1)}
             >
-                The name comes from <span lang="kk-KZ">алма</span>, the Kazakh word for "apple" and is often translated as "full of apples". In fact, the region surrounding Almaty is thought to be the ancestral home of the apple, and the wild <i lang="la">Malus sieversii</i> is considered a likely candidate for the ancestor of the modern domestic apple.
+                The name comes from <span lang="kk-KZ">алма</span>, the Kazakh word for "apple" and is often translated
+                as "full of apples". In fact, the region surrounding Almaty is thought to be the ancestral home of the
+                apple, and the wild <i lang="la">Malus sieversii</i> is considered a likely candidate for the ancestor
+                of the modern domestic apple.
             </Panel>
         </>
     );
@@ -115,4 +126,15 @@ function Panel({
         </section>
     );
 }
+
+function Task() {
+    return (
+        <TasksProvider>
+            <h1>List:</h1>
+            <AddTask/>
+            <TaskList/>
+        </TasksProvider>
+    )
+}
+
 export default App;
