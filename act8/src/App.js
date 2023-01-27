@@ -1,5 +1,5 @@
 import './App.css';
-import {useRef} from "react";
+import {useRef, useState} from "react";
 
 function App() {
     return (
@@ -14,7 +14,7 @@ function App() {
                 >
                     Learn React
                 </a>
-
+                <ModifyDOM/>
                 <Clicker/>
                 <CatScroll/>
             </header>
@@ -93,6 +93,27 @@ function CatScroll() {
                 </ul>
             </div>
         </>
+    )
+}
+
+function ModifyDOM() {
+    const [show, setShow] = useState(false)
+    const ref = useRef(null)
+
+    function handleShowHide() {
+        setShow(!show)
+    }
+
+    function handleRemove() {
+        ref.current.remove()
+    }
+
+    return (
+        <div>
+            <p hidden={!show} ref={ref}>Hello~</p>
+            <button onClick={handleShowHide}><b>show/hide</b></button>
+            <button disabled={!show} onClick={handleRemove}><b>remove</b></button>
+        </div>
     )
 }
 
