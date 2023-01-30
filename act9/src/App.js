@@ -1,7 +1,13 @@
 import './App.css';
 import {useEffect, useRef, useState} from "react";
-
+let didInit = false
 function App() {
+    useEffect(()=>{
+        if(!didInit){
+            didInit = true
+            //do something
+        }
+    },[])
     return (
         <div className="App">
             <header className="App-header">
