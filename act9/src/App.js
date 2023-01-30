@@ -1,13 +1,15 @@
 import './App.css';
 import {useEffect, useRef, useState} from "react";
+
 let didInit = false
+
 function App() {
-    useEffect(()=>{
-        if(!didInit){
+    useEffect(() => {
+        if (!didInit) {
             didInit = true
             //do something
         }
-    },[])
+    }, [])
     return (
         <div className="App">
             <header className="App-header">
@@ -116,6 +118,16 @@ function Clock() {
             {show && <MyClock/>}
         </>
     )
+}
+
+function Parent() {
+    const data = null
+    return <Child mydata={data}></Child>
+}
+
+function Child({mydata}) {
+    console.log({mydata})
+
 }
 
 export default App;
