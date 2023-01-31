@@ -23,16 +23,20 @@ function App() {
 }
 
 const serverUrl = "https://localhost:1234"
+const Connected_msg = "连接成功！"
 
 function ChatRoom({roomId, theme}) {
+    const onConnected = (() => {
+        showNotification(Connected_msg, theme && "dark")
+    })
     useEffect(() => {
         const connection = createConnection(serverUrl, roomId)
         connection.on("connected", () => {
-            showNotification("Connected!", theme && "dark")
+            onConnected()
         })
         connection.connect()
         return () => connection.disconnect()
-    }, [roomId, theme])
+    }, [roomId])
     return <h1>Welcome to : {roomId}</h1>
 }
 
