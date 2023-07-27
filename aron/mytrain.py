@@ -5,9 +5,10 @@ if __name__ == "__main__":
     # model = YOLO(f"ultralytics/models/v8/yolov8n.yaml")
     result = model.train(
         data="dataset/whale.v3i.yolov8/data.yaml",
+        project="result",
         epochs=300,
         imgsz=640,
-        batch=2
+        batch=4
     )
     results = model.val()
 
