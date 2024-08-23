@@ -4,7 +4,7 @@
 
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
-|id_robot | 机器人标识 |**VARCHAR(20)** <br> not null <br> primary|
+|id_robot | 机器人标识，ROBOT_INFO的id_robot外键|**VARCHAR(20)** <br> not null <br> primary|
 |collection_datetime | 数据库里传一个NOW()进去 |**DATETIME** <br> not null|
 |connection_success_info | 返回的是“成功”或“失败”的布尔类型。(成功和失败的存入为1和0)|**TINYINT** <br> null|
 |connection_code |连接代码|**VARCHAR(5)**<br> null|
@@ -57,7 +57,7 @@
 
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
-|id_robot |机器人标识 |**VARCHAR(20)** <br> not null <br> primary |
+|id_robot |机器人标识，ROBOT_INFO的id_robot外键|**VARCHAR(20)** <br> not null <br> primary |
 |collection_datetime |写一个NOW()作为数据的记录时间 |**DATETIME** <br> not null |
 |collection_sf6 |六氟化硫数据 |**FLOAT** <br> null|
 |collection_humidity |湿度数据 |**FLOAT** <br> null|
@@ -76,7 +76,7 @@
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
 |id_pig |机器人识别到的生猪标识 |**VARCHAR(50)** <br> not null| 
-|id_robot |机器人标识 |**VARCHAR(20)** <br> not null| 
+|id_robot |机器人标识，ROBOT_INFO的id_robot外键 |**VARCHAR(20)** <br> not null| 
 |collection_datetime |写一个NOW()作为数据的记录时间 |**DATETIME** <br> not null| 
 |collection_img_rgb |文件路径 拍摄的生猪的可见光图像 |**VARCHAR(200)** <br> null | 
 |collection_img_thermal |文件路径 拍摄的生猪的热红外图像 |**VARCHAR(200)** <br> null | 
@@ -88,7 +88,7 @@
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
 |id_robot |机器人标识 |**VARCHAR(20)** <br> not null <br> primary | 
-|id_account |机器人归属账号 |**VARCHAR(50)** <br> not null | 
+|id_account |机器人归属账号 ACCOUNT_INFO的id_account外键|**VARCHAR(50)** <br> not null | 
 |owner_robot |机器人归属 |**VARCHAR(20)** <br>null | 
 |product_robot |生产方 |**VARCHAR(20)** <br> null | 
 |ship_robot |订购日期 |**DATETIME** <br> null | 
@@ -124,7 +124,7 @@
 |id_sysnotice |系统通知编号 |**INT** <br>not null <br> primary <br> 自增| 
 |title_sysnotice |系统通知标题 |**VARCHAR(50)** <br>not null | 
 |content_sysnotice |系统通知内容 |**VARCHAR(500)** <br>not null | 
-|createby_sysnotice |系统通知创建者，ACCOUNT_INFO的id_account |**VARCHAR(50)** <br>not null | 
+|createby_sysnotice |系统通知创建者，ACCOUNT_INFO的id_account外键 |**VARCHAR(50)** <br>not null | 
 |createdate_sysnotice |系统通知时间 |**DATETIME** <br>not null | 
 |status_sysnotice |通知可用性。1可用，0关闭。默认1|**TINYINT** <br>not null | 
 |updateby_sysnotice |系统通知更新者，ACCOUNT_INFO的id_account |**VARCHAR(50)** <br> null | 

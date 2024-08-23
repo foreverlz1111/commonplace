@@ -12,6 +12,8 @@ create table robot_info
     equip_ram_robot       varchar(10)  null,
     equip_equipment_robot varchar(100) null,
     price_robot           float        null,
-    remark_robot          varchar(400) null
+    remark_robot          varchar(400) null,
+    constraint robot_info_account_info_id_account_fk
+        foreign key (id_account) references account_info (id_account)
 );
 

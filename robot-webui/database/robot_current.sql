@@ -48,6 +48,8 @@ create table robot_current
     status_battery_chargetime      int          null,
     status_battery_last_chargehour float        null,
     status_sensor_isopen           tinyint      null,
-    status_disk_space              varchar(20)  null
+    status_disk_space              varchar(20)  null,
+    constraint robot_current_robot_info_id_robot_fk
+        foreign key (id_robot) references robot_info (id_robot)
 );
 
