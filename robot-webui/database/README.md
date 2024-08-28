@@ -69,6 +69,7 @@
 |collection_lidar_3d |文件路径 激光雷达传感器3D点云数据|**VARCHAR(200)** <br> null|
 |collection_lidar_2d |文件路径 激光雷达传感器2D点云数据|**VARCHAR(200)** <br> null|
 |collection_rgb |文件路径 相机RGB图像 数据|**VARCHAR(200)** <br> null|
+|collection_thermal|文件路径 相机热红外图像 数据|**VARCHAR(200)** <br> null|
 |collection_depth |文件路径 相机depth图像数据|**VARCHAR(200)** <br> null|
 
 * 表 PIG_CURRENT

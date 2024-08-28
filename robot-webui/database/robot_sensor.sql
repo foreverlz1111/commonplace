@@ -13,6 +13,7 @@ create table robot_sensor
     collection_lidar_3d    varchar(200) null,
     collection_lidar_2d    varchar(200) null,
     collection_rgb         varchar(200) null,
+    collection_thermal     varchar(200) null,
     collection_depth       varchar(200) null,
     constraint robot_sensor_robot_info_id_robot_fk
         foreign key (id_robot) references robot_info (id_robot)
