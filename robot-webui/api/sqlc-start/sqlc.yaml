@@ -1,0 +1,14 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries:
+    - "query/query_connect_test.sql"
+    - "query/query_connect_ddl.sql"
+    schema:
+    - "schema/connect_test.sql"
+    - "schema/connect_ddl.sql"
+    gen:
+      go:
+        package: "myquery"
+        out: "myquery"
+
