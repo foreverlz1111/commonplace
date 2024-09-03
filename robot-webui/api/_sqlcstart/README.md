@@ -1,7 +1,12 @@
 ### sqlc 配置
 
-#### 0. 安装 sqlc
+#### 0. 安装 sqlc 和 mysql驱动
 > sudo snap install sqlc
+> 
+> go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+> 
+> go get github.com/go-sql-driver/mysql
+
 
 #### 1. 填写 sqlc.yaml 配置文件
 
@@ -22,4 +27,4 @@
 #### 4. 在Console中，通过sqlc生成sql查询函数
 > sqlc generte
 > 
-#### 5. 通过"database/sql"库连接数据库，调用生成sql查询函数： [myquery.go](https://github.com/foreverlz1111/commonplace/tree/main/robot-webui/api/sqlc-start/myquery.go)
+#### 5. 通过"database/sql"库连接数据库，编写一个用户代码 [myquery.go](https://github.com/foreverlz1111/commonplace/tree/main/robot-webui/api/sqlc-start/myquery.go) 来调用生成sql查询函数

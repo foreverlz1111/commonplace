@@ -1,3 +1,11 @@
-sqlc-start/db_config.go
-sqlc-start/run
-sqlc-start/myquery
+_sqlcstart/db_config.go
+_sqlcstart/run
+_sqlcstart/myquery
+localtest
+config/db_config.go
+/docs/docs.go
+/docs/swagger.json
+/docs/swagger.yaml
+/run
+/dboutput/query_account_info.sql.go
+/dboutput/models.go

@@ -22,7 +22,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	log.Println(testconnect)
+	log.Printf("%+v", testconnect)
 
 	result, err := queries.AddLine(ctx, myquery.AddLineParams{
 		MyrowUser:   sql.NullString{String: "Pyrus", Valid: true},

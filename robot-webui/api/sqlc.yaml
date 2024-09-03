@@ -1,0 +1,22 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries:
+      - "query/query_sysnotice_info.sql"
+      - "query/query_robot_sensor.sql"
+      - "query/query_robot_info.sql"
+      - "query/query_robot_current.sql"
+      - "query/query_pig_current.sql"
+      - "query/query_account_info.sql"
+    schema:
+    - "schema/sysnotice_info.sql"
+    - "schema/robot_sensor.sql"
+    - "schema/robot_info.sql"
+    - "schema/robot_current.sql"
+    - "schema/pig_current.sql"
+    - "schema/account_info.sql"
+    gen:
+      go:
+        package: "dboutput"
+        out: "dboutput"
+
