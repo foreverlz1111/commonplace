@@ -7,9 +7,22 @@ import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
+import {useEffect, useState} from "react";
 
 export default function StatusRobot({selectedRobot, handleRobotChange}) {
-
+    const [loginAccount, setLoginAccount] = useState(null);
+    useEffect(() => {
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                setLoginAccount(storedAccount);
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
     return (<Box>
         <Toolbar/>
         <Box

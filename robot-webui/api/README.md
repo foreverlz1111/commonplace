@@ -1,8 +1,8 @@
 ### net/http包 实现页面请求响应 + sqlc 实现数据库操纵 + Swagger 自动文档
 
-- net/http包 用法 位于 [_netstart文件夹]()
+- net/http包 用法 位于 [_netstart文件夹](https://github.com/foreverlz1111/commonplace/tree/main/robot-webui/api/_netstart)
 
-- sqlc 用法 位于 [_sqlcstart]()
+- sqlc 用法 位于 [_sqlcstart](https://github.com/foreverlz1111/commonplace/tree/main/robot-webui/api/_sqlcstart)
 
 - Swagger 注释用法 如下：
 
@@ -29,3 +29,8 @@
 8. ###### @Failure：描述失败时的响应，参数与 @Success 类似。
 
 9. ###### @Router：指定请求路径和方法。路径格式和方法都必须匹配实际的路由。
+
+TODO：
+
+1.  "validator" 包 验证输入数据
+2.  "token" 包 授权验证

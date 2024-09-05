@@ -19,7 +19,7 @@ import ViewCarousel from "@mui/icons-material/ViewCarousel";
 import Avatar from "@mui/material/Avatar";
 import {AccountCircle, GitHub} from "@mui/icons-material";
 import Button from "@mui/material/Button";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 import Myrobot from "./Myrobot";
 import Mysensor from "./Mysensor";
@@ -28,6 +28,7 @@ import StatusRobot from "./StatusRobot";
 import Envrobot from "./Envrobot";
 import Pigface from "./Pigface";
 import Screen from "./Screen";
+import {useRouter} from "next/router";
 
 const drawerWidth = 240;
 
@@ -78,6 +79,27 @@ const Drawer = styled(MuiDrawer, {shouldForwardProp: (prop) => prop !== 'open'})
 const defaultTheme = createTheme();
 
 export default function Main() {
+    const router = useRouter();
+    const [loginAccount, setLoginAccount] = useState(null);
+    const [welcome, setWelcome] = useState("user");
+    useEffect(() => {
+        // 尝试从 sessionStorage 中读取数据
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                setLoginAccount(storedAccount); // 如果有数据，则更新状态
+                setWelcome(
+                    storedAccount.IDAccount+" - "+storedAccount.DeptAccount.String
+                )
+                // console.log('Stored account:', storedAccount); // 打印的是正确的存储的值
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
+
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {
         setOpen(!open);
@@ -93,6 +115,13 @@ export default function Main() {
     const handleRobotChange = (event) => {
         setSelectedRobot(event.target.value);
     };
+
+    const exitButton = () =>{
+        // 清空 sessionStorage 和 localStorage
+        sessionStorage.clear();
+        // 重定向到首页
+        router.push('/');
+    };
     return (
         <ThemeProvider theme={defaultTheme}>
             <Box sx={{display: 'flex'}}>
@@ -100,7 +129,7 @@ export default function Main() {
                 <AppBar position="absolute" open={open}>
                     <Toolbar
                         sx={{
-                            bgcolor:"#6750A4",
+                            bgcolor: "#6750A4",
                             pr: '24px', // keep right padding when drawer closed
                         }}
                     >
@@ -125,7 +154,8 @@ export default function Main() {
                         >
                             {selectedPage}
                         </Typography>
-                        <IconButton href={"https://github.com/foreverlz1111/commonplace/tree/main/robot-webui"} color="inherit">
+                        <IconButton href={"https://github.com/foreverlz1111/commonplace/tree/main/robot-webui"}
+                                    color="inherit">
                             <Badge color="secondary">
                                 <GitHub/>
                             </Badge>
@@ -141,8 +171,8 @@ export default function Main() {
                                 <AccountCircle/>
                             </Badge>
                         </IconButton>
-                        id_account
-                        <Button sx={{m: 1, width: 2, height: 25}} variant="contained" color="secondary" href={"/"}>
+                        {welcome}
+                        <Button sx={{m: 1, width: 2, height: 25}} variant="contained" color="secondary" onClick={exitButton}>
                             退出
                         </Button>
                     </Toolbar>
