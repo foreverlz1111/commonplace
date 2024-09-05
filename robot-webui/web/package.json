@@ -20,6 +20,7 @@
     "@mui/material": "^5.16.7",
     "@mui/material-nextjs": "latest",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
+    "@mui/utils": "^6.0.2",
     "@mui/x-charts": "^7.14.0",
     "@mui/x-date-pickers": "latest",
     "date-fns": "^3.6.0",

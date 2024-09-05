@@ -37,7 +37,7 @@ func main() {
 
 		value := r.FormValue("id_account")
 		if value == "" {
-			log.Println("Missing /'id_account/'")
+			log.Println("Missing 'id_account'")
 			return
 		}
 		// 输出请求体内容

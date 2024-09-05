@@ -1,21 +1,127 @@
 import Typography from "@mui/material/Typography";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
-import {FormControl, InputLabel, ListItem, MenuItem, Select} from "@mui/material";
+import {CircularProgress, FormControl, InputLabel, ListItem, MenuItem, Select} from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
 import List from "@mui/material/List";
 import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import {useEffect, useState} from "react";
+import RefreshIcon from '@mui/icons-material/Refresh';
+import Button from "@mui/material/Button";
 
-export default function StatusRobot({selectedRobot, handleRobotChange}) {
+export default function StatusRobot() {
+
+
+    const handleRobotChange = (event) => {
+        setSelectedRobot(event.target.value);
+    };
+
     const [loginAccount, setLoginAccount] = useState(null);
+    const [robotList, setRobotList] = useState([]);
+    const [robotCurrent, setRobotCurrent] = useState();
+    const [robotInfo, setRobotInfo] = useState();
+    const [selectedRobot, setSelectedRobot] = useState('');
+    const getRobotInfo = async (id_robot) => {
+        // 加载 机器人状态
+        try {
+            const response = await fetch(`/api/robotinfo/?id_robot=${id_robot}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取机器人信息成功:', data);
+                setRobotInfo(data);
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    }
+
+    const getRobotCurrent = async (id_robot) => {
+        // 加载 机器人状态
+        try {
+            const response = await fetch(`/api/robotcurrent/?id_robot=${id_robot}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取机器人状态成功:', data);
+                setRobotCurrent(data);
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    }
+    const handleGetRobotCurrent = () => {
+        setRobotCurrent();
+        setRobotInfo()
+        setTimeout(() => {
+            // 在延迟后执行异步操作
+            getRobotCurrent(selectedRobot)
+                .then((e) => {
+                    console.log('err:', e);
+                })
+                .catch((error) => {
+                    console.error('获取机器人状态失败:', error);
+                });
+
+            getRobotInfo(selectedRobot)
+                .then((e) => {
+                    console.log('err:', e);
+                })
+                .catch((error) => {
+                    console.error('获取机器人信息失败:', error);
+                });
+        }, 1000); // 延迟 1 秒
+    }
+    const getRobotList = async (id_account) => {
+        // 读取机器人列表
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        try {
+            const response = await fetch(`/api/accountrobot/?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取机器人列表成功:', data);
+                setRobotList(data); // 更新机器人列表状态
+                setSelectedRobot(data[0])
+                await getRobotCurrent(data[0])
+                await getRobotInfo(data[0])
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    };
+
     useEffect(() => {
         try {
             const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
             if (storedAccount) {
-                setLoginAccount(storedAccount);
+                getRobotList(storedAccount.IDAccount)
             } else {
                 console.log('No login account found in sessionStorage.');
             }
@@ -23,6 +129,7 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
             console.error('Error reading loginAccount from sessionStorage:', error);
         }
     }, []);
+
     return (<Box>
         <Toolbar/>
         <Box
@@ -45,9 +152,23 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                     onChange={handleRobotChange}
                     label="id_robot"
                 >
-                    <MenuItem value="robot1">SYS505R01</MenuItem>
+                    {/*<MenuItem value="robot1">null</MenuItem>*/}
+                    {robotList.length === 0 ? (
+                        <MenuItem value="">
+                            <em>账号无机器人</em>
+                        </MenuItem>
+                    ) : (
+                        robotList.map((robot, index) => (
+                            <MenuItem key={index} value={robot}>
+                                {robot}
+                            </MenuItem>
+                        ))
+                    )}
                 </Select>
             </FormControl>
+            <Button sx={{ml:2}} variant="contained" endIcon={<RefreshIcon />} onClick={handleGetRobotCurrent}>
+                刷新机器人信息
+            </Button>
         </Box>
         <Paper
             sx={{
@@ -91,9 +212,14 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                 >
                     <Typography variant="body2" sx={{m: 1}}>
                         机器人状态：
-                    </Typography><Typography variant="body2" sx={{m: 1}}>
-                    状态
-                </Typography>
+                    </Typography>
+                    {!robotCurrent ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        <Typography variant="body2" sx={{m: 1}}>
+                            {robotCurrent.StatusNavigating?.String || 'N/A'}
+                        </Typography>
+                    )}
                 </Box>
 
             </Box>
@@ -133,7 +259,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                     <Typography align="left">电量：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">90%</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.StatusBatteryPower?.Int16 || 'N/A'} %
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -144,7 +276,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                     <Typography align="left">电池温度：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">30℃</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.StatusBatteryTemp?.Float64 || 'N/A'} ℃
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -155,7 +293,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                     <Typography align="left">电池电流：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">1 A</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.StatusBatteryCur?.Float64 || 'N/A'} A
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -165,7 +309,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                 <Typography align="left">电池温压：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">1 V</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.StatusBatteryVol?.Float64 || 'N/A'} V
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
@@ -175,7 +325,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                 <Typography align="left">充电状态：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">1</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.StatusBatteryIscharging?.Int16 === 1 ?("充电中"):("放电中") || 'N/A'}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
@@ -185,7 +341,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                 <Typography align="left">充电次数：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">50</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.StatusBatteryChargetime?.Int32 || 'N/A'}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
@@ -197,7 +359,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                     <Typography align="left">电池健康：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">96</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.StatusBatteryHealth?.Int16 || 'N/A'} %
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -208,7 +376,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                                     <Typography align="left">累计充电小时：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">2430</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.StatusBatteryChargehour?.Float64 || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -233,7 +407,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                         <ListItem>
                             <Grid container alignItems="center">
                                 <Grid item>
-                                    <Typography align="left">热成像，深度相机，激光雷达</Typography>
+                                    {!robotInfo ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotInfo.EquipEquipmentRobot?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -256,7 +436,13 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                         <ListItem>
                             <Grid container alignItems="center">
                                 <Grid item>
-                                    <Typography align="left">2024-08-24 17时49分</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent?.CollectionDatetime || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
@@ -287,63 +473,99 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">NavisBoard：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionNavisboard?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">NavisBrain：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionNavisbrain?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">NavisBridge：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionNavisbridge?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/><ListItem>
                         <Grid container alignItems="center">
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 <Typography align="left">移动平台软件：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.VersionPlatformSoftware?.String || 'N/A'}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
                         <Divider component="li"/><ListItem>
                         <Grid container alignItems="center">
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 <Typography align="left">移动平台硬件：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.VersionPlatformHardware?.String || 'N/A'}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
                         <Divider component="li"/><ListItem>
                         <Grid container alignItems="center">
-                            <Grid item xs={4}>
+                            <Grid item xs={6}>
                                 <Typography align="left">激光雷达软件：</Typography>
                             </Grid>
                             <Grid item>
-                                <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                {!robotCurrent ? (
+                                    <CircularProgress size={20} />
+                                ) : (
+                                    <Typography align="left">
+                                        {robotCurrent.VersionLidarSoftware?.String || 'N/A'}
+                                    </Typography>
+                                )}
                             </Grid>
                         </Grid>
                     </ListItem>
@@ -351,88 +573,136 @@ export default function StatusRobot({selectedRobot, handleRobotChange}) {
 
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">激光雷达硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionLidarHardware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">激光雷达软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionLidarHardware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">惯性传感器软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionInertiaSoftware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">惯性传感器硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionInertiaHardware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">视觉传感器软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionVisionSoftware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">视觉传感器硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionVisionHardware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">核心计算单元软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionComputeSoftware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>
                         <Divider component="li"/>
                         <ListItem>
                             <Grid container alignItems="center">
-                                <Grid item xs={4}>
+                                <Grid item xs={6}>
                                     <Typography align="left">核心计算单元硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    <Typography align="left">Lorem ipsum dolor sit amet</Typography>
+                                    {!robotCurrent ? (
+                                        <CircularProgress size={20} />
+                                    ) : (
+                                        <Typography align="left">
+                                            {robotCurrent.VersionComputeHardware?.String || 'N/A'}
+                                        </Typography>
+                                    )}
                                 </Grid>
                             </Grid>
                         </ListItem>

@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import * as React from 'react';
-import PropTypes, {any} from 'prop-types';
+import PropTypes from 'prop-types';
 import {alpha} from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -25,6 +25,8 @@ import {Add, Delete, Edit} from "@mui/icons-material";
 import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem} from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import TextField from "@mui/material/TextField";
+import {useEffect, useState} from "react";
+import {log} from "next/dist/server/typescript/utils";
 
 function createData(id_robot, owner_robot, born_robot, product_robot, price_robot, equip_equipment_robot, remark_robot) {
     return {
@@ -32,7 +34,6 @@ function createData(id_robot, owner_robot, born_robot, product_robot, price_robo
     };
 }
 
-const rows = [createData("SYS505R01", "浙江农林大学", "2024年8月25日", "松林", "27850", "热红外成像，深度相机，激光雷达"),];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -65,7 +66,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [{
-    id: 'name', numeric: false, disablePadding: true, label: 'id_robot',
+    id: 'id_robot', numeric: false, disablePadding: true, label: 'id_robot',
 }, {
     id: 'calories', numeric: true, disablePadding: false, label: '机器人所属',
 }, {
@@ -77,7 +78,7 @@ const headCells = [{
 }, {
     id: 'equip', numeric: true, disablePadding: false, label: '外设',
 }, {
-    id: 'equip', numeric: true, disablePadding: false, label: '',
+    id: 'mod', numeric: true, disablePadding: false, label: '',
 },];
 
 function EnhancedTableHead(props) {
@@ -171,7 +172,8 @@ function EnhancedTableToolbar(props) {
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
-export default function Myrobot({}) {
+export default function Myrobot() {
+    const [rows, setRows] = React.useState([]);
     const [AddButtonStatus, setAddButtonStatus] = React.useState(false);
 
     const handleAddButtonStatusOpen = () => {
@@ -181,7 +183,6 @@ export default function Myrobot({}) {
     const handleAddButtonStatusClose = () => {
         setAddButtonStatus(false);
     };
-
 
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('id_robot');
@@ -239,7 +240,7 @@ export default function Myrobot({}) {
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage],);
+    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage,rows],);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -249,6 +250,70 @@ export default function Myrobot({}) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const [loginAccount, setLoginAccount] = useState(null)
+    const extractValidData = (data) => {
+        return {
+            id_robot: data.IDRobot,
+            owner_robot: data.OwnerRobot.Valid ? data.OwnerRobot.String : "N/A",
+            born_robot: data.BornRobot.Valid ? new Date(data.BornRobot.Time).toLocaleDateString() : "N/A",
+            product_robot: data.ProductRobot.Valid ? data.ProductRobot.String : "N/A",
+            price_robot: data.PriceRobot.Valid ? data.PriceRobot.Float64 : "N/A",
+            equip_equipment_robot: data.EquipEquipmentRobot.Valid ? data.EquipEquipmentRobot.String : "N/A",
+        };
+    };
+    const getMyRobot = async (loginAccount) => {
+        try {
+            const response = await fetch(`/api/myrobot/?id_account=${loginAccount}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取我的机器人信息成功:', data);
+                const processedRows = data.map(item => {
+                    const processedData = extractValidData(item);
+                    return createData(
+                        processedData.id_robot,
+                        processedData.owner_robot,
+                        processedData.born_robot,
+                        processedData.product_robot,
+                        processedData.price_robot,
+                        processedData.equip_equipment_robot,
+                    );
+                });
+                console.log("processedRows",processedRows)
+                setRows(processedRows);
+
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    }
+
+    useEffect(() => {
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                getMyRobot(storedAccount.IDAccount);
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log("Updated rows:", rows);
+    }, [rows]);
+
     return (<Box
         component="main"
         sx={{
@@ -444,7 +509,6 @@ export default function Myrobot({}) {
                                 {visibleRows.map((row, index) => {
                                     const isItemSelected = isSelected(row.id);
                                     const labelId = `enhanced-table-checkbox-${index}`;
-
                                     return (<TableRow
                                         hover
                                         role="checkbox"
@@ -498,7 +562,6 @@ export default function Myrobot({}) {
                                                 MenuListProps={{
                                                     'aria-labelledby': 'basic-button',
                                                 }}
-                                                endIcon={<KeyboardArrowDownIcon/>}
                                             >
                                                 <MenuItem onClick={handleClose} disabled>删除</MenuItem>
                                                 <MenuItem onClick={handleClose} disabled>编辑</MenuItem>

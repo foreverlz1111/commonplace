@@ -83,18 +83,8 @@ func accountRobot(w http.ResponseWriter, r *http.Request, ctx context.Context, q
 	if r.Method != http.MethodGet {
 		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
 	}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-	var webJson map[string]string
-	err = json.Unmarshal(body, &webJson)
-	if err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-		return
-	}
-	valueIdAccount, _ := webJson["id_account"]
+	urlquery := r.URL.Query()
+	valueIdAccount := urlquery.Get("id_account")
 	if valueIdAccount == "" {
 		log.Println("Key not found: 'id_account'")
 	}
@@ -103,6 +93,7 @@ func accountRobot(w http.ResponseWriter, r *http.Request, ctx context.Context, q
 		log.Println(err)
 		http.Error(w, "Database Server Error", http.StatusInternalServerError)
 	} else {
+		log.Println("id_account", valueIdAccount, " Search robot")
 		json.NewEncoder(w).Encode(result)
 	}
 }
@@ -110,18 +101,21 @@ func robotCurrent(w http.ResponseWriter, r *http.Request, ctx context.Context, q
 	if r.Method != http.MethodGet {
 		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
 	}
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-	var webJson map[string]string
-	err = json.Unmarshal(body, &webJson)
-	if err != nil {
-		http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-		return
-	}
-	valueIdRobot, _ := webJson["id_robot"]
+	//body, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	//	return
+	//}
+	//var webJson map[string]string
+	//err = json.Unmarshal(body, &webJson)
+	//if err != nil {
+	//	http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+	//	return
+	//}
+	//valueIdRobot, _ := webJson["id_robot"]
+
+	urlquery := r.URL.Query()
+	valueIdRobot := urlquery.Get("id_robot")
 	if valueIdRobot == "" {
 		log.Println("Key not found: 'id_robot'")
 	}
@@ -130,6 +124,43 @@ func robotCurrent(w http.ResponseWriter, r *http.Request, ctx context.Context, q
 		log.Println(err)
 		http.Error(w, "Database Server Error", http.StatusInternalServerError)
 	} else {
+		log.Println("id_robot", valueIdRobot, " Search")
+		json.NewEncoder(w).Encode(result)
+	}
+}
+func robotInfo(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+	valueIdRobot := urlquery.Get("id_robot")
+	if valueIdRobot == "" {
+		log.Println("Key not found: 'id_robot'")
+	}
+	result, err := query.RobotInfoSearchByID(ctx, valueIdRobot)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database Server Error", http.StatusInternalServerError)
+	} else {
+		log.Println("id_robot[]", valueIdRobot, " Search")
+		json.NewEncoder(w).Encode(result)
+	}
+}
+func myRobot(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+	valueIdAccount := urlquery.Get("id_account")
+	if valueIdAccount == "" {
+		log.Println("Key not found: 'id_account'")
+	}
+	result, err := query.RobotInfoSearchByID2(ctx, valueIdAccount)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Database Server Error", http.StatusInternalServerError)
+	} else {
+		log.Println("id_info []", valueIdAccount, " Search")
 		json.NewEncoder(w).Encode(result)
 	}
 }
@@ -150,6 +181,12 @@ func main() {
 	})
 	http.HandleFunc("/robotcurrent", func(w http.ResponseWriter, r *http.Request) {
 		robotCurrent(w, r, ctx, query)
+	})
+	http.HandleFunc("/robotinfo", func(w http.ResponseWriter, r *http.Request) {
+		robotInfo(w, r, ctx, query)
+	})
+	http.HandleFunc("/myrobot", func(w http.ResponseWriter, r *http.Request) {
+		myRobot(w, r, ctx, query)
 	})
 	http.HandleFunc("/doc/", httpSwagger.WrapHandler)
 	log.Println("Listening on :8080")

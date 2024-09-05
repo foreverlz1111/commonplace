@@ -110,11 +110,7 @@ export default function Main() {
     const handlePageChange = (page) => {
         setSelectedPage(page);
     };
-    const [selectedRobot, setSelectedRobot] = useState('robot1');
 
-    const handleRobotChange = (event) => {
-        setSelectedRobot(event.target.value);
-    };
 
     const exitButton = () =>{
         // 清空 sessionStorage 和 localStorage
@@ -220,7 +216,7 @@ export default function Main() {
                          overflow: 'auto',
                      }}>
                     {selectedPage === '机器人状态' && (
-                        <StatusRobot selectedRobot={selectedRobot} handleRobotChange={handleRobotChange}/>
+                        <StatusRobot />
                     )}
                     {selectedPage === "我的机器人" && (
                         <Myrobot/>
