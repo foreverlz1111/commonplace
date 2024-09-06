@@ -1,7 +1,8 @@
 create table robot_current
 (
-    id_robot                       varchar(20)  not null comment '机器人标识，ROBOT_INFO的id_robot外键'
+    id                             int auto_increment
         primary key,
+    id_robot                       varchar(20)  not null comment '机器人标识，ROBOT_INFO的id_robot外键',
     collection_datetime            datetime     not null comment '数据库里传一个NOW()进去',
     connection_success_info        tinyint      null comment '返回的是“成功”或“失败”的布尔类型。(成功和失败的存入为1和0)',
     connection_code                varchar(5)   null comment '连接代码',
