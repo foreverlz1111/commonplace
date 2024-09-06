@@ -26,15 +26,16 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 import {SmartToy} from "@mui/icons-material";
+import {useEffect, useState} from "react";
+import {CircularProgress} from "@mui/material";
 
 
-function createData(collection_datetime, id_robot, sf6, humid, temp, noice, nh, so2) {
+function createData(id, collection_datetime, id_robot, sf6, humid, temp, noice, nh, so2) {
     return {
-        collection_datetime, id_robot, sf6, humid, temp, noice, nh, so2
+        id, collection_datetime, id_robot, sf6, humid, temp, noice, nh, so2
     };
 }
 
-const rows = [createData("2024年8月24日22时44分", "SYS505R01", "15", "30", "20", "25", "5", "5",),];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -67,7 +68,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [{
-    id: 'name', numeric: false, disablePadding: true, label: '记录日期',
+    id: 'collection_datetime', numeric: false, disablePadding: true, label: '记录日期',
 }, {
     id: 'id_robot', numeric: true, disablePadding: false, label: 'id_robot',
 }, {
@@ -176,6 +177,8 @@ EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 export default function Envrobot({}) {
+    const [rows, setRows] = useState([])
+
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('id_robot');
     const [selected, setSelected] = React.useState([]);
@@ -232,7 +235,7 @@ export default function Envrobot({}) {
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage],);
+    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage, rows],);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -242,6 +245,62 @@ export default function Envrobot({}) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const extractValidData = (data) => {
+        return {
+            id: data.ID,
+            collection_datetime: data.CollectionDatetime,
+            id_robot: data.IDRobot,
+            sf6: data.CollectionSF6.Valid ? data.CollectionSF6.Float64 : "N/A",
+            humid: data.CollectionHumidity.Valid ? data.CollectionHumidity.Float64 : "N/A",
+            temp: data.CollectionTemperature.Valid ? data.CollectionTemperature.Float64 : "N/A",
+            noice: data.CollectionNoise.Valid ? data.CollectionNoise.Float64 : "N/A",
+            nh: data.CollectionNH.Valid ? data.CollectionNH.Float64 : "N/A",
+            so2: data.CollectionSO2.Valid ? data.CollectionSO2.Float64 : "N/A",
+        };
+    }
+    const getMyRobotSensorEnv = async (id_account) => {
+        try {
+            const response = await fetch(`/api/myrobotsensor?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {
+                    contentType: "application/json",
+                }
+            })
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取我的机器人传感器信息成功:', data);
+                const processedRows = data.map(item => {
+                    const processedData = extractValidData(item);
+                    return createData(
+                        processedData.id,
+                        processedData.collection_datetime,
+                        processedData.id_robot,
+                        processedData.sf6,
+                        processedData.humid,
+                        processedData.temp,
+                        processedData.noice,
+                        processedData.nh,
+                        processedData.so2,
+                    );
+                });
+                setRows(processedRows);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                getMyRobotSensorEnv(storedAccount.IDAccount);
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
     return (<Box
         component="main"
         sx={{
@@ -305,54 +364,55 @@ export default function Envrobot({}) {
                                 onRequestSort={handleRequestSort}
                                 rowCount={rows.length}
                             />
-                            <TableBody>
-                                {visibleRows.map((row, index) => {
-                                    const isItemSelected = isSelected(row.id);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    return (<TableRow
-                                        hover
-                                        role="checkbox"
-                                        aria-checked={isItemSelected}
-                                        tabIndex={-1}
-                                        key={row.id_robot}
-                                        selected={isItemSelected}
-                                        sx={{cursor: 'pointer'}}
-                                    >
-                                        <TableCell padding="checkbox">
-                                            <Checkbox
-                                                onClick={(event) => handleClick(event, row.id)}
-                                                color="primary"
-                                                checked={isItemSelected}
-                                                inputProps={{
-                                                    'aria-labelledby': labelId,
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
+                            {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
+                                <TableBody>
+                                    {visibleRows.map((row, index) => {
+                                        const isItemSelected = isSelected(row.id);
+                                        const labelId = `enhanced-table-checkbox-${index}`;
+                                        return (<TableRow
+                                            hover
+                                            role="checkbox"
+                                            aria-checked={isItemSelected}
+                                            tabIndex={-1}
+                                            key={row.id}
+                                            selected={isItemSelected}
+                                            sx={{cursor: 'pointer'}}
                                         >
-                                            {row.collection_datetime}
-                                        </TableCell>
-                                        <TableCell align="left">{row.id_robot}</TableCell>
-                                        <TableCell align="left">{row.sf6}</TableCell>
-                                        <TableCell align="left">{row.humid}</TableCell>
-                                        <TableCell align="left">{row.temp}</TableCell>
-                                        <TableCell align="left">{row.noice}</TableCell>
-                                        <TableCell align="left">{row.nh}</TableCell>
-                                        <TableCell align="left">{row.so2}</TableCell>
-                                    </TableRow>);
-                                })}
-                                {emptyRows > 0 && (<TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}/>
-                                </TableRow>)}
-                            </TableBody>
+                                            <TableCell padding="checkbox">
+                                                <Checkbox
+                                                    onClick={(event) => handleClick(event, row.id)}
+                                                    color="primary"
+                                                    checked={isItemSelected}
+                                                    inputProps={{
+                                                        'aria-labelledby': labelId,
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell
+                                                component="th"
+                                                id={labelId}
+                                                scope="row"
+                                                padding="none"
+                                            >
+                                                {row.collection_datetime}
+                                            </TableCell>
+                                            <TableCell align="left">{row.id_robot}</TableCell>
+                                            <TableCell align="left">{row.sf6}</TableCell>
+                                            <TableCell align="left">{row.humid}</TableCell>
+                                            <TableCell align="left">{row.temp}</TableCell>
+                                            <TableCell align="left">{row.noice}</TableCell>
+                                            <TableCell align="left">{row.nh}</TableCell>
+                                            <TableCell align="left">{row.so2}</TableCell>
+                                        </TableRow>);
+                                    })}
+                                    {emptyRows > 0 && (<TableRow
+                                        style={{
+                                            height: (dense ? 33 : 53) * emptyRows,
+                                        }}
+                                    >
+                                        <TableCell colSpan={6}/>
+                                    </TableRow>)}
+                                </TableBody>)}
                         </Table>
                     </TableContainer>
                     <TablePagination

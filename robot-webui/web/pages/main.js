@@ -83,7 +83,6 @@ export default function Main() {
     const [loginAccount, setLoginAccount] = useState(null);
     const [welcome, setWelcome] = useState("user");
     useEffect(() => {
-        // 尝试从 sessionStorage 中读取数据
         try {
             const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
             if (storedAccount) {
@@ -234,7 +233,7 @@ export default function Main() {
                         <Pigface></Pigface>
                     )}
                     {selectedPage === "展示大屏" && (
-                        <Screen selectedRobot={selectedRobot} handleRobotChange={handleRobotChange}></Screen>
+                        <Screen ></Screen>
                     )}
                 </Box>
             </Box>

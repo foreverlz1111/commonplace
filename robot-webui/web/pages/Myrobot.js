@@ -22,7 +22,16 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import {visuallyHidden} from '@mui/utils';
 import Button from "@mui/material/Button";
 import {Add, Delete, Edit} from "@mui/icons-material";
-import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem} from "@mui/material";
+import {
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Menu,
+    MenuItem
+} from "@mui/material";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import TextField from "@mui/material/TextField";
 import {useEffect, useState} from "react";
@@ -240,7 +249,7 @@ export default function Myrobot() {
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage,rows],);
+    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage, rows],);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -285,7 +294,7 @@ export default function Myrobot() {
                         processedData.equip_equipment_robot,
                     );
                 });
-                console.log("processedRows",processedRows)
+                console.log("processedRows", processedRows)
                 setRows(processedRows);
 
             } else {
@@ -474,7 +483,7 @@ export default function Myrobot() {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={handleAddButtonStatusClose}>取消</Button>
-                        <Button type="submit">提交</Button>
+                        <Button disabled type="submit">提交</Button>
                     </DialogActions>
                 </Dialog>
                 <Button sx={{mr: 1}} variant="contained" startIcon={<Delete/>} color="error" disabled>删除</Button>
@@ -505,78 +514,79 @@ export default function Myrobot() {
                                 onRequestSort={handleRequestSort}
                                 rowCount={rows.length}
                             />
-                            <TableBody>
-                                {visibleRows.map((row, index) => {
-                                    const isItemSelected = isSelected(row.id);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    return (<TableRow
-                                        hover
-                                        role="checkbox"
-                                        aria-checked={isItemSelected}
-                                        tabIndex={-1}
-                                        key={row.id_robot}
-                                        selected={isItemSelected}
-                                        sx={{cursor: 'pointer'}}
-                                    >
-                                        <TableCell padding="checkbox">
-                                            <Checkbox
-                                                onClick={(event) => handleClick(event, row.id)}
-                                                color="primary"
-                                                checked={isItemSelected}
-                                                inputProps={{
-                                                    'aria-labelledby': labelId,
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
+                            {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
+                                <TableBody>
+                                    {visibleRows.map((row, index) => {
+                                        const isItemSelected = isSelected(row.id);
+                                        const labelId = `enhanced-table-checkbox-${index}`;
+                                        return (<TableRow
+                                            hover
+                                            role="checkbox"
+                                            aria-checked={isItemSelected}
+                                            tabIndex={-1}
+                                            key={row.id}
+                                            selected={isItemSelected}
+                                            sx={{cursor: 'pointer'}}
                                         >
-                                            {row.id_robot}
-                                        </TableCell>
-                                        <TableCell align="left">{row.owner_robot}</TableCell>
-                                        <TableCell align="left">{row.born_robot}</TableCell>
-                                        <TableCell align="left">{row.product_robot}</TableCell>
-                                        <TableCell align="left">{row.price_robot}</TableCell>
-                                        <TableCell align="left">{row.equip_equipment_robot}</TableCell>
-                                        <TableCell align="left">
-                                            <Button
-                                                id="demo-customized-button"
-                                                aria-controls={open ? 'demo-customized-menu' : undefined}
-                                                aria-haspopup="true"
-                                                aria-expanded={open ? 'true' : undefined}
-                                                variant="contained"
-                                                disableElevation
-                                                endIcon={<KeyboardArrowDownIcon/>}
-                                                onClick={handlemenuClick}
+                                            <TableCell padding="checkbox">
+                                                <Checkbox
+                                                    onClick={(event) => handleClick(event, row.id)}
+                                                    color="primary"
+                                                    checked={isItemSelected}
+                                                    inputProps={{
+                                                        'aria-labelledby': labelId,
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell
+                                                component="th"
+                                                id={labelId}
+                                                scope="row"
+                                                padding="none"
                                             >
-                                                操作
-                                            </Button>
-                                            <Menu
-                                                id="basic-menu"
-                                                anchorEl={anchorEl}
-                                                open={open}
-                                                onClose={handleClose}
-                                                MenuListProps={{
-                                                    'aria-labelledby': 'basic-button',
-                                                }}
-                                            >
-                                                <MenuItem onClick={handleClose} disabled>删除</MenuItem>
-                                                <MenuItem onClick={handleClose} disabled>编辑</MenuItem>
-                                            </Menu><
+                                                {row.id_robot}
+                                            </TableCell>
+                                            <TableCell align="left">{row.owner_robot}</TableCell>
+                                            <TableCell align="left">{row.born_robot}</TableCell>
+                                            <TableCell align="left">{row.product_robot}</TableCell>
+                                            <TableCell align="left">{row.price_robot}</TableCell>
+                                            <TableCell align="left">{row.equip_equipment_robot}</TableCell>
+                                            <TableCell align="left">
+                                                <Button
+                                                    id="demo-customized-button"
+                                                    aria-controls={open ? 'demo-customized-menu' : undefined}
+                                                    aria-haspopup="true"
+                                                    aria-expanded={open ? 'true' : undefined}
+                                                    variant="contained"
+                                                    disableElevation
+                                                    endIcon={<KeyboardArrowDownIcon/>}
+                                                    onClick={handlemenuClick}
+                                                >
+                                                    操作
+                                                </Button>
+                                                <Menu
+                                                    id="basic-menu"
+                                                    anchorEl={anchorEl}
+                                                    open={open}
+                                                    onClose={handleClose}
+                                                    MenuListProps={{
+                                                        'aria-labelledby': 'basic-button',
+                                                    }}
+                                                >
+                                                    <MenuItem onClick={handleClose} disabled>删除</MenuItem>
+                                                    <MenuItem onClick={handleClose} disabled>编辑</MenuItem>
+                                                </Menu><
                                                     /TableCell>
-                                    </TableRow>);
-                                })}
-                                {emptyRows > 0 && (<TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}/>
-                                </TableRow>)}
-                            </TableBody>
+                                        </TableRow>);
+                                    })}
+                                    {emptyRows > 0 && (<TableRow
+                                        style={{
+                                            height: (dense ? 33 : 53) * emptyRows,
+                                        }}
+                                    >
+                                        <TableCell colSpan={6}/>
+                                    </TableRow>)}
+                                </TableBody>)}
                         </Table>
                     </TableContainer>
                     <TablePagination

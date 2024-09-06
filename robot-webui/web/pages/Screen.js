@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
-import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
+import {CircularProgress, FormControl, InputLabel, MenuItem, Select} from "@mui/material";
 import {Refresh} from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import {BarChart, Gauge, LineChart} from "@mui/x-charts";
@@ -19,9 +19,116 @@ import PowerIcon from '@mui/icons-material/Power';
 import SavingsIcon from '@mui/icons-material/Savings';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import HistoryIcon from '@mui/icons-material/History';
+import {useEffect, useState} from "react";
 
 
-export default function Screen({selectedRobot, handleRobotChange}) {
+export default function Screen() {
+    const [robotList, setRobotList] = useState([]);
+    const [selectedRobot, setSelectedRobot] = useState('');
+    const [robotCurrent, setRobotCurrent] = useState();
+    const [temp,setTemp] = useState([]);
+    const [humid,setHumid] = useState([]);
+    const [sensordata,setSensordata] = useState([])
+
+    const handleRobotChange = (event) => {
+        setSelectedRobot(event.target.value);
+    };
+
+    const handleGetRobotCurrent = () => {
+        setRobotCurrent();
+        setTemp([])
+        setHumid([])
+        setSensordata([])
+        setTimeout(() => {
+            // 在延迟后执行异步操作
+            getRobotCurrent(selectedRobot)
+                .then((e) => {
+                    console.log('err:', e);
+                })
+                .catch((error) => {
+                    console.error('获取机器人状态失败:', error);
+                });
+
+            getRobotSensor(selectedRobot)
+                .then((e) => {
+                    console.log('err:', e);
+                })
+                .catch((error) => {
+                    console.error('获取机器人信息失败:', error);
+                });
+        }, 1000); // 延迟 1 秒
+    }
+    const getRobotSensor = async (id_robot) => {
+        try {
+            const response = await fetch(`/api/myrobotsensorscreen?id_robot=${id_robot}`, {
+                method: 'GET',
+                headers: { contentType: "application/json" }
+            });
+            if (response.status === 200) {
+                const data = await response.json();
+
+                setTemp(data.map(item => item.CollectionTemperature.Float64))
+                setHumid(data.map(item => item.CollectionHumidity.Float64))
+                setSensordata(data)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    const getRobotCurrent = async (id_robot) => {
+        // 加载 机器人状态
+        try {
+            const response = await fetch(`/api/robotcurrent/?id_robot=${id_robot}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取机器人状态成功:', data);
+                setRobotCurrent(data);
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    }
+    const getRobotList = async (id_account) => {
+        // 读取机器人列表
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+        try {
+            const response = await fetch(`/api/accountrobot/?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取机器人列表成功:', data);
+                setRobotList(data); // 更新机器人列表状态
+                setSelectedRobot(data[0])
+                await getRobotCurrent(data[0])
+                await getRobotSensor(data[0])
+            } else {
+                const errorData = await response.json();
+                console.log('错误:', errorData);
+            }
+        } catch (error) {
+            console.log('请求失败:', error);
+        }
+    };
+    useEffect(() => {
+        const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+        if (storedAccount) {
+            getRobotList(storedAccount.IDAccount);
+        }
+    }, []);
 
 
     return (
@@ -56,7 +163,17 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                         onChange={handleRobotChange}
                         label="id_robot"
                     >
-                        <MenuItem value="robot1">SYS505R01</MenuItem>
+                        {robotList.length === 0 ? (
+                            <MenuItem value="">
+                                <em>账号无机器人</em>
+                            </MenuItem>
+                        ) : (
+                            robotList.map((robot, index) => (
+                                <MenuItem key={index} value={robot}>
+                                    {robot}
+                                </MenuItem>
+                            ))
+                        )}
                     </Select>
                 </FormControl>
                 <Button
@@ -66,6 +183,7 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                     variant="contained"
                     tabIndex={-1}
                     startIcon={<Refresh/>}
+                    onClick={handleGetRobotCurrent}
                 >
                     刷新
                 </Button>
@@ -75,19 +193,25 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                 <Grid sx={{
                     bgcolor: "white", height: "25vh", borderRadius: 2, ml: 2,
                 }} xs={3.5}>
+                    <Typography variant="body2" component="div" align="center" gutterBottom>
+                        温度
+                    </Typography>
                     <LineChart
                         xAxis={[{data: [1, 2, 3, 4, 5, 6]}]}
                         series={[{
-                            data: [30, 32, 34, 36, 38, 40],
+                            data: temp,
                         },]}
                     />
                 </Grid>
 
-                <Grid sx={{ml: 1, borderRadius: 2, height: "25vh", bgcolor: "white"}} xs={4}>
+                <Grid sx={{ml: 1, borderRadius: 2, height: "25vh", bgcolor: "white"}} xs={3.5}>
+                    <Typography variant="body2" component="div" align="center" gutterBottom>
+                        湿度
+                    </Typography>
                     <LineChart
                         xAxis={[{data: [1, 2, 3, 4, 5, 6]}]}
                         series={[{
-                            data: [50, 55, 55, 53, 57, 61],
+                            data: humid,
                         },]}
                     />
                 </Grid>
@@ -101,8 +225,8 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                     flexDirection: "column",
                     alignItems: "center", // 水平居中
                     justifyContent: "center" // 垂直居中
-                }} xs={1}>
-                    <Gauge value={50} startAngle={-90} endAngle={90}/>
+                }} xs={2}>
+                    <Gauge value={sensordata[0]?.CollectionNoise.Float64} startAngle={-90} endAngle={90}/>
                     <Tooltip title="每几分钟更新">
                         <Button>噪声 (声贝)</Button>
                     </Tooltip>
@@ -110,10 +234,14 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                 <Grid sx={{bgcolor: "white", ml: 1, borderRadius: 2, height: "25vh",}} xs={2.6}>
                     <BarChart
                         xAxis={[{
-                            scaleType: 'band', data: ["六氟化硫", "氨气", "二氧化碳"]
+                            scaleType: 'band', data: ["六氟化硫", "氨气", "二氧化硫"]
                         }]}
                         series={[{
-                            data: [5, 2, 15],
+                            data: [
+                                sensordata[0]?.CollectionSf6.Float64,
+                                sensordata[0]?.CollectionNh.Float64,
+                                sensordata[0]?.CollectionSo2.Float64
+                            ],
                         },]}
                         barLabel="value"
                     />
@@ -143,13 +271,25 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                     }}>
                         <Button sx={{width: "80%", height: "7vh", mb: 2,}} variant="contained"
                                 startIcon={<MapRoundedIcon/>}>
-                            <Typography variant={"h5"}>导航地图：</Typography>
-                            <Typography variant={"h5"}>猪栏1</Typography>
+                            <Typography variant={"h6"}>导航地图：</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusNavigatingmap?.String || 'N/A'}
+                                </Typography>
+                            )}
                         </Button>
                         <Button sx={{width: "80%", height: "7vh", mb: 2, bgcolor: "#ffa1a1"}} variant="contained"
                                 startIcon={<PinDropRoundedIcon/>}>
-                            <Typography variant={"h5"}>导航任务：</Typography>
-                            <Typography variant={"h5"}>猪栏1巡视</Typography>
+                            <Typography variant={"h6"}>导航任务：</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusNavigatingtask?.String || 'N/A'}
+                                </Typography>
+                            )}
                         </Button>
                     </Grid>
                     <Grid container xs={4.5} sx={{
@@ -170,7 +310,13 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                                 <Battery90Icon/>
                                 <Typography variant={"h6"}>电池电量</Typography>
                             </IconButton>
-                            <Typography variant={"h4"}>80%</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusBatteryPower?.Int16 || 'N/A'} %
+                                </Typography>
+                            )}
                         </Grid>
                         <Grid xs={5.5} sx={{
                             height: "11vh",
@@ -188,7 +334,13 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                                 <Battery5BarIcon/>
                                 <Typography variant={"h6"}>电池健康</Typography>
                             </IconButton>
-                            <Typography variant={"h4"}>96%</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusBatteryHealth?.Int16 || 'N/A'} %
+                                </Typography>
+                            )}
                         </Grid>
 
                         <Grid xs={11.2} sx={{
@@ -205,7 +357,13 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                                 <BatteryChargingFullIcon/>
                                 <Typography variant={"h6"}>充电状态</Typography>
                             </IconButton>
-                            <Typography variant={"h6"}>未充电</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent?.StatusBatteryIscharging ?"充电中":"未充电" || 'N/A'}
+                                </Typography>
+                            )}
                         </Grid>
                     </Grid>
                     <Grid xs={3.5} sx={{
@@ -233,7 +391,13 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                                 <FlashAutoIcon/>
                                 <Typography variant={"h6"}>电池电流 (A)</Typography>
                             </IconButton>
-                            <Typography variant={"h6"}>1</Typography>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusBatteryCur?.Float64  || 'N/A'}
+                                </Typography>
+                            )}
                         </Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
@@ -250,7 +414,14 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                             <ElectricBoltIcon/>
                             <Typography variant={"h6"}>电池电压 (V)</Typography>
                         </IconButton>
-                            <Typography variant={"h6"}>1</Typography></Grid>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusBatteryVol?.Float64  || 'N/A'}
+                                </Typography>
+                            )}
+                            </Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
                             width: "80%",
@@ -266,7 +437,14 @@ export default function Screen({selectedRobot, handleRobotChange}) {
                             <PowerIcon/>
                             <Typography variant={"h6"}>总充电小时：</Typography>
                         </IconButton>
-                            <Typography variant={"h6"}>220</Typography></Grid>
+                            {!robotCurrent ? (
+                                <CircularProgress size={20} />
+                            ) : (
+                                <Typography variant="h6" sx={{m: 1}}>
+                                    {robotCurrent.StatusBatteryChargehour?.Float64  || 'N/A'}
+                                </Typography>
+                            )}
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>

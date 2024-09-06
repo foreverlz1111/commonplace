@@ -13,7 +13,7 @@ import Button from "@mui/material/Button";
 
 export default function StatusRobot() {
 
-
+    const [selectedRobot, setSelectedRobot] = useState('');
     const handleRobotChange = (event) => {
         setSelectedRobot(event.target.value);
     };
@@ -22,7 +22,7 @@ export default function StatusRobot() {
     const [robotList, setRobotList] = useState([]);
     const [robotCurrent, setRobotCurrent] = useState();
     const [robotInfo, setRobotInfo] = useState();
-    const [selectedRobot, setSelectedRobot] = useState('');
+
     const getRobotInfo = async (id_robot) => {
         // 加载 机器人状态
         try {
@@ -221,7 +221,6 @@ export default function StatusRobot() {
                         </Typography>
                     )}
                 </Box>
-
             </Box>
 
             {/* 右侧部分，占 2/3 宽度 */}

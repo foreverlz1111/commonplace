@@ -26,10 +26,14 @@ import TextField from "@mui/material/TextField";
 import {DatePicker, LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from "dayjs";
+import {useEffect} from "react";
+import {NextResponse as response} from "next/server";
+import {CircularProgress} from "@mui/material";
 
 
-function createData(collection_datetime, id_robot, collection_imu, collection_lidar_2d, collection_lidar_3d, collection_rgb, collection_thermal, collection_depth) {
+function createData(id, collection_datetime, id_robot, collection_imu, collection_lidar_2d, collection_lidar_3d, collection_rgb, collection_thermal, collection_depth) {
     return {
+        id,
         collection_datetime,
         id_robot,
         collection_imu,
@@ -40,8 +44,6 @@ function createData(collection_datetime, id_robot, collection_imu, collection_li
         collection_depth
     };
 }
-
-const rows = [createData("2024年8月25日20时44分", "SYS505R01", "是", "否", "是", "是", "是", "是",),];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -74,7 +76,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [{
-    id: 'name', numeric: false, disablePadding: true, label: '记录日期',
+    id: 'collection_datetime', numeric: false, disablePadding: true, label: '记录日期',
 }, {
     id: 'id_robot', numeric: true, disablePadding: false, label: 'id_robot',
 }, {
@@ -98,37 +100,37 @@ function EnhancedTableHead(props) {
     };
 
     return (<TableHead>
-            <TableRow>
-                <TableCell padding="checkbox">
-                    <Checkbox
-                        color="primary"
-                        indeterminate={numSelected > 0 && numSelected < rowCount}
-                        checked={rowCount > 0 && numSelected === rowCount}
-                        onChange={onSelectAllClick}
-                        inputProps={{
-                            'aria-label': '全选',
-                        }}
-                    />
-                </TableCell>
-                {headCells.map((headCell) => (<TableCell
-                        key={headCell.id}
-                        align={headCell.numeric ? 'left' : 'left'}
-                        padding={headCell.disablePadding ? 'none' : 'normal'}
-                        sortDirection={orderBy === headCell.id ? order : false}
-                    >
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
-                            onClick={createSortHandler(headCell.id)}
-                        >
-                            {headCell.label}
-                            {orderBy === headCell.id ? (<Box component="span" sx={visuallyHidden}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                                </Box>) : null}
-                        </TableSortLabel>
-                    </TableCell>))}
-            </TableRow>
-        </TableHead>);
+        <TableRow>
+            <TableCell padding="checkbox">
+                <Checkbox
+                    color="primary"
+                    indeterminate={numSelected > 0 && numSelected < rowCount}
+                    checked={rowCount > 0 && numSelected === rowCount}
+                    onChange={onSelectAllClick}
+                    inputProps={{
+                        'aria-label': '全选',
+                    }}
+                />
+            </TableCell>
+            {headCells.map((headCell) => (<TableCell
+                key={headCell.id}
+                align={headCell.numeric ? 'left' : 'left'}
+                padding={headCell.disablePadding ? 'none' : 'normal'}
+                sortDirection={orderBy === headCell.id ? order : false}
+            >
+                <TableSortLabel
+                    active={orderBy === headCell.id}
+                    direction={orderBy === headCell.id ? order : 'asc'}
+                    onClick={createSortHandler(headCell.id)}
+                >
+                    {headCell.label}
+                    {orderBy === headCell.id ? (<Box component="span" sx={visuallyHidden}>
+                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                    </Box>) : null}
+                </TableSortLabel>
+            </TableCell>))}
+        </TableRow>
+    </TableHead>);
 }
 
 EnhancedTableHead.propTypes = {
@@ -144,47 +146,49 @@ function EnhancedTableToolbar(props) {
     const {numSelected} = props;
 
     return (<Toolbar
-            sx={{
-                pl: {sm: 2}, pr: {xs: 1, sm: 1}, ...(numSelected > 0 && {
-                    bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-                }),
-            }}
+        sx={{
+            pl: {sm: 2}, pr: {xs: 1, sm: 1}, ...(numSelected > 0 && {
+                bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
+            }),
+        }}
+    >
+        {numSelected > 0 ? (<Typography
+            sx={{flex: '1 1 100%'}}
+            color="inherit"
+            variant="subtitle1"
+            component="div"
         >
-            {numSelected > 0 ? (<Typography
-                    sx={{flex: '1 1 100%'}}
-                    color="inherit"
-                    variant="subtitle1"
-                    component="div"
-                >
-                    {numSelected} 列已选择
-                </Typography>) : (<Typography
-                    sx={{flex: '1 1 100%'}}
-                    variant="h6"
-                    id="tableTitle"
-                    component="div"
-                >
+            {numSelected} 列已选择
+        </Typography>) : (<Typography
+            sx={{flex: '1 1 100%'}}
+            variant="h6"
+            id="tableTitle"
+            component="div"
+        >
 
-                </Typography>)}
+        </Typography>)}
 
-            {numSelected > 0 ? (// <Tooltip title="Delete">
-                //     <IconButton>
-                //         <DeleteIcon />
-                //     </IconButton>
-                // </Tooltip>
-                <></>) : (<Tooltip title="Filter list">
-                    <IconButton>
-                        <FilterListIcon/>
-                    </IconButton>
-                </Tooltip>)}
-        </Toolbar>);
+        {numSelected > 0 ? (// <Tooltip title="Delete">
+            //     <IconButton>
+            //         <DeleteIcon />
+            //     </IconButton>
+            // </Tooltip>
+            <></>) : (<Tooltip title="Filter list">
+            <IconButton>
+                <FilterListIcon/>
+            </IconButton>
+        </Tooltip>)}
+    </Toolbar>);
 }
 
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 export default function Mysensor({}) {
+    const [rows, setRows] = React.useState([]);
+
     const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('id_robot');
+    const [orderBy, setOrderBy] = React.useState('collection_datetime');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
@@ -239,7 +243,7 @@ export default function Mysensor({}) {
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage],);
+    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage, rows],);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -249,144 +253,203 @@ export default function Mysensor({}) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+
+    const extractValidData = (data) => {
+        return {
+            id: data.ID,
+            collection_datetime: data.CollectionDatetime,
+            id_robot: data.IDRobot,
+            collection_imu: data.CollectionIMU.Valid ? data.CollectionIMU.String : "N/A",
+            collection_lidar_2d: data.CollectionLidar2D.Valid ? data.CollectionLidar2D.String : "N/A",
+            collection_lidar_3d: data.CollectionLidar3D.Valid ? data.CollectionLidar3D.String : "N/A",
+            collection_rgb: data.CollectionRGB.Valid ? data.CollectionRGB.String : "N/A",
+            collection_thermal: data.CollectionThermal.Valid ? data.CollectionThermal.String : "N/A",
+            collection_depth: data.CollectionDepth.Valid ? data.CollectionDepth.String : "N/A"
+        };
+    }
+
+    const getMyRobotSensor = async (id_account) => {
+        try {
+            const response = await fetch(`/api/myrobotsensor?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {
+                    contentType: "application/json",
+                }
+            })
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取我的机器人传感器信息成功:', data);
+                const processedRows = data.map(item => {
+                    const processedData = extractValidData(item);
+                    return createData(
+                        processedData.id,
+                        processedData.collection_datetime,
+                        processedData.id_robot,
+                        processedData.collection_imu,
+                        processedData.collection_lidar_2d,
+                        processedData.collection_lidar_3d,
+                        processedData.collection_rgb,
+                        processedData.collection_thermal,
+                        processedData.collection_depth,
+                    );
+                });
+                setRows(processedRows);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                getMyRobotSensor(storedAccount.IDAccount);
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
     return (<Box
-            component="main"
+        component="main"
+        sx={{
+            backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+            flexGrow: 1,
+            height: '100vh',
+            overflow: 'auto',
+        }}
+    >
+        <Toolbar/>
+        <Box
             sx={{
-                backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-                flexGrow: 1,
-                height: '100vh',
-                overflow: 'auto',
+                display: 'flex', alignItems: 'center', justifyContent: 'left', flexDirection: 'row', // 确保项目在同一行
+                ml: 4, mt: 2
             }}
         >
-            <Toolbar/>
-            <Box
-                sx={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'left', flexDirection: 'row', // 确保项目在同一行
-                    ml: 4, mt: 2
-                }}
-            >
 
-            </Box>
-            <Paper
-                sx={{
-                    m: 4, mt: 0, p: 0, display: 'flex', flexDirection: 'row',
+        </Box>
+        <Paper
+            sx={{
+                m: 4, mt: 0, p: 0, display: 'flex', flexDirection: 'row',
 
-                }}
-            >
-                {/*表格*/}
-                <Box sx={{width: '100%'}}>
-                    <Paper sx={{width: '100%', mb: 2}}>
-                        <EnhancedTableToolbar numSelected={selected.length}/>
-                        <TableContainer>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'left',
-                                    flexDirection: 'row',
-                                    ml: 2,
-                                    mt: 1
-                                }}>
-                                <Typography sx={{ml: 2}} variant="outlined">选择日期：</Typography>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DatePicker label="Uncontrolled picker" value={dayjs().subtract(1, 'day')}/>
-                                    <Typography sx={{ml: 1, mr: 1}}>-</Typography>
-                                    <DatePicker label="Uncontrolled picker" value={dayjs()}/>
-                                </LocalizationProvider>
-                                <Box sx={{ml: 2, display: 'flex', alignItems: 'flex-end'}}>
-                                    <SmartToy sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                                    <TextField id="input-with-sx" label="id_robot 输入" variant="standard"/>
-                                </Box>
-                                <Button sx={{ml: 2}} variant="contained">查询</Button>
+            }}
+        >
+            {/*表格*/}
+            <Box sx={{width: '100%'}}>
+                <Paper sx={{width: '100%', mb: 2}}>
+                    <EnhancedTableToolbar numSelected={selected.length}/>
+                    <TableContainer>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'left',
+                                flexDirection: 'row',
+                                ml: 2,
+                                mt: 1
+                            }}>
+                            <Typography sx={{ml: 2}} variant="outlined">选择日期：</Typography>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker label="起始日" value={dayjs().subtract(1, 'day')}/>
+                                <Typography sx={{ml: 1, mr: 1}}>-</Typography>
+                                <DatePicker label="结束日" value={dayjs()}/>
+                            </LocalizationProvider>
+                            <Box sx={{ml: 2, display: 'flex', alignItems: 'flex-end'}}>
+                                <SmartToy sx={{color: 'action.active', mr: 1, my: 0.5}}/>
+                                <TextField id="input-with-sx" label="id_robot 输入" variant="standard"/>
                             </Box>
-                            <Table
-                                sx={{minWidth: 750}}
-                                aria-labelledby="tableTitle"
-                                size={dense ? 'small' : 'medium'}
-                            >
-                                <EnhancedTableHead
-                                    numSelected={selected.length}
-                                    order={order}
-                                    orderBy={orderBy}
-                                    onSelectAllClick={handleSelectAllClick}
-                                    onRequestSort={handleRequestSort}
-                                    rowCount={rows.length}
-                                />
+                            <Button sx={{ml: 2}} disabled variant="contained">查询</Button>
+                        </Box>
+                        <Table
+                            sx={{minWidth: 750}}
+                            aria-labelledby="tableTitle"
+                            size={dense ? 'small' : 'medium'}
+                        >
+                            <EnhancedTableHead
+                                numSelected={selected.length}
+                                order={order}
+                                orderBy={orderBy}
+                                onSelectAllClick={handleSelectAllClick}
+                                onRequestSort={handleRequestSort}
+                                rowCount={rows.length}
+                            />
+                            {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
                                 <TableBody>
                                     {visibleRows.map((row, index) => {
                                         const isItemSelected = isSelected(row.id);
                                         const labelId = `enhanced-table-checkbox-${index}`;
                                         return (<TableRow
-                                                hover
-                                                role="checkbox"
-                                                aria-checked={isItemSelected}
-                                                tabIndex={-1}
-                                                key={row.id_robot}
-                                                selected={isItemSelected}
-                                                sx={{cursor: 'pointer'}}
+                                            hover
+                                            role="checkbox"
+                                            aria-checked={isItemSelected}
+                                            tabIndex={-1}
+                                            key={row.id}
+                                            selected={isItemSelected}
+                                            sx={{cursor: 'pointer'}}
+                                        >
+                                            <TableCell padding="checkbox">
+                                                <Checkbox
+                                                    onClick={(event) => handleClick(event, row.id)}
+                                                    color="primary"
+                                                    checked={isItemSelected}
+                                                    inputProps={{
+                                                        'aria-labelledby': labelId,
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell
+                                                component="th"
+                                                id={labelId}
+                                                scope="row"
+                                                padding="none"
                                             >
-                                                <TableCell padding="checkbox">
-                                                    <Checkbox
-                                                        onClick={(event) => handleClick(event, row.id)}
-                                                        color="primary"
-                                                        checked={isItemSelected}
-                                                        inputProps={{
-                                                            'aria-labelledby': labelId,
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell
-                                                    component="th"
-                                                    id={labelId}
-                                                    scope="row"
-                                                    padding="none"
-                                                >
-                                                    {row.collection_datetime}
-                                                </TableCell>
-                                                <TableCell align="left">{row.id_robot}</TableCell>
-                                                <TableCell sx={{color: row.collection_imu === "是" ? "black" : "red"}}
-                                                           align="left">{row.collection_imu}</TableCell>
-                                                <TableCell
-                                                    sx={{color: row.collection_lidar_2d === "是" ? "black" : "red"}}
-                                                    align="left">{row.collection_lidar_2d}</TableCell>
-                                                <TableCell
-                                                    sx={{color: row.collection_lidar_3d === "是" ? "black" : "red"}}
-                                                    align="left">{row.collection_lidar_3d}</TableCell>
-                                                <TableCell sx={{color: row.collection_rgb === "是" ? "black" : "red"}}
-                                                           align="left">{row.collection_rgb}</TableCell>
-                                                <TableCell
-                                                    sx={{color: row.collection_thermal === "是" ? "black" : "red"}}
-                                                    align="left">{row.collection_thermal}</TableCell>
-                                                <TableCell sx={{color: row.collection_depth === "是" ? "black" : "red"}}
-                                                           align="left">{row.collection_depth}</TableCell>
-                                            </TableRow>);
+                                                {row.collection_datetime}
+                                            </TableCell>
+                                            <TableCell align="left">{row.id_robot}</TableCell>
+                                            <TableCell sx={{color: row.collection_imu !== "N/A" ? "black" : "red"}}
+                                                       align="left">{row.collection_imu}</TableCell>
+                                            <TableCell
+                                                sx={{color: row.collection_lidar_2d !== "N/A" ? "black" : "red"}}
+                                                align="left">{row.collection_lidar_2d}</TableCell>
+                                            <TableCell
+                                                sx={{color: row.collection_lidar_3d !== "N/A" ? "black" : "red"}}
+                                                align="left">{row.collection_lidar_3d}</TableCell>
+                                            <TableCell sx={{color: row.collection_rgb !== "N/A" ? "black" : "red"}}
+                                                       align="left">{row.collection_rgb}</TableCell>
+                                            <TableCell
+                                                sx={{color: row.collection_thermal !== "N/A" ? "black" : "red"}}
+                                                align="left">{row.collection_thermal}</TableCell>
+                                            <TableCell sx={{color: row.collection_depth !== "N/A" ? "black" : "red"}}
+                                                       align="left">{row.collection_depth}</TableCell>
+                                        </TableRow>);
                                     })}
                                     {emptyRows > 0 && (<TableRow
-                                            style={{
-                                                height: (dense ? 33 : 53) * emptyRows,
-                                            }}
-                                        >
-                                            <TableCell colSpan={6}/>
-                                        </TableRow>)}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                        <TablePagination
-                            rowsPerPageOptions={[5, 10, 25]}
-                            component="div"
-                            count={rows.length}
-                            rowsPerPage={rowsPerPage}
-                            page={page}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            labelRowsPerPage={"每页显示列数"}
-                        />
-                    </Paper>
-                    <FormControlLabel
-                        control={<Switch checked={dense} onChange={handleChangeDense}/>}
-                        label="紧凑视图"
+                                        style={{
+                                            height: (dense ? 33 : 53) * emptyRows,
+                                        }}
+                                    >
+                                        <TableCell colSpan={6}/>
+                                    </TableRow>)}
+                                </TableBody>)}
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 25]}
+                        component="div"
+                        count={rows.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        labelRowsPerPage={"每页显示列数"}
                     />
-                </Box>
-            </Paper>
-        </Box>)
+                </Paper>
+                <FormControlLabel
+                    control={<Switch checked={dense} onChange={handleChangeDense}/>}
+                    label="紧凑视图"
+                />
+            </Box>
+        </Paper>
+    </Box>)
 }

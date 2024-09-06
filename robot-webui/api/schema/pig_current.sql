@@ -1,7 +1,8 @@
 create table pig_current
 (
-    id_pig                 varchar(50)  not null comment '机器人识别到的生猪标识'
+    id                     int auto_increment
         primary key,
+    id_pig                 varchar(50)  not null comment '机器人识别到的生猪标识',
     id_robot               varchar(20)  not null comment '机器人标识，ROBOT_INFO的id_robot外键',
     collection_datetime    datetime     not null comment '写一个NOW()作为数据的记录时间',
     collection_img_rgb     varchar(200) null comment '文件路径 拍摄的生猪的可见光图像',

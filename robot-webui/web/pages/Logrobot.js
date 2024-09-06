@@ -26,15 +26,15 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
 import {SmartToy} from "@mui/icons-material";
+import {useEffect} from "react";
+import {CircularProgress} from "@mui/material";
 
 
-function createData(collection_datetime, id_robot, mapping, mission, map2d, map3d, sensor) {
+function createData(id, collection_datetime, id_robot, mapping, mission, map2d, map3d, sensor) {
     return {
-        collection_datetime, id_robot, mapping, mission, map2d, map3d, sensor
+        id, collection_datetime, id_robot, mapping, mission, map2d, map3d, sensor
     };
 }
-
-const rows = [createData("2024年8月24日22时44分", "SYS505R01", "地图", "任务", "2D地图名", "3D地图名", "工作",),];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -67,7 +67,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [{
-    id: 'name', numeric: false, disablePadding: true, label: '记录日期',
+    id: 'collection_datetime', numeric: false, disablePadding: true, label: '记录日期',
 }, {
     id: 'id_robot', numeric: true, disablePadding: false, label: 'id_robot',
 }, {
@@ -174,6 +174,8 @@ EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
 export default function Logrobot({}) {
+    const [rows, setRows] = React.useState([]);
+
     const [order, setOrder] = React.useState('asc');
     const [orderBy, setOrderBy] = React.useState('id_robot');
     const [selected, setSelected] = React.useState([]);
@@ -230,7 +232,7 @@ export default function Logrobot({}) {
     // Avoid a layout jump when reaching the last page with empty rows.
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
-    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage],);
+    const visibleRows = React.useMemo(() => stableSort(rows, getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage,), [order, orderBy, page, rowsPerPage, rows],);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -240,6 +242,61 @@ export default function Logrobot({}) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const extractValidData = (data) => {
+        return {
+            id: data.ID,
+            collection_datetime: data.CollectionDatetime,
+            id_robot: data.IDRobot,
+            map: data.StatusNavigatingmap.Valid ? data.StatusNavigatingmap.String : "N/A",
+            mission: data.StatusNavigatingtask.Valid ? data.StatusNavigatingtask.String : "N/A",
+            map2d: data.Status2DMApping.Valid ? data.Status2DMApping.String : "N/A",
+            map3d: data.Status3DMApping.Valid ? data.Status3DMApping.String : "N/A",
+            sensor: data.StatusSensorIsOpen.Valid ? data.StatusSensorIsOpen.Bool : "N/A",
+        };
+    }
+    const getRobotCurrentAll = async (id_account) => {
+        try {
+            const response = await fetch(`/api/robotcurrentall?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {
+                    contentType: "application/json",
+                }
+            })
+            if (response.status === 200) {
+                const data = await response.json();
+                console.log('获取我的机器人全部信息成功:', data);
+                const processedRows = data.map(item => {
+                    const processedData = extractValidData(item);
+                    return createData(
+                        processedData.id,
+                        processedData.collection_datetime,
+                        processedData.id_robot,
+                        processedData.map,
+                        processedData.mission,
+                        processedData.map2d,
+                        processedData.map3d,
+                        processedData.sensor,
+                    );
+                });
+                setRows(processedRows);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(() => {
+        try {
+            const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+            if (storedAccount) {
+                getRobotCurrentAll(storedAccount.IDAccount);
+            } else {
+                console.log('No login account found in sessionStorage.');
+            }
+        } catch (error) {
+            console.error('Error reading loginAccount from sessionStorage:', error);
+        }
+    }, []);
+
     return (<Box
         component="main"
         sx={{
@@ -288,7 +345,7 @@ export default function Logrobot({}) {
                                 <SmartToy sx={{color: 'action.active', mr: 1, my: 0.5}}/>
                                 <TextField id="input-with-sx" label="id_robot 输入" variant="standard"/>
                             </Box>
-                            <Button sx={{ml: 2}} variant="contained">查询</Button>
+                            <Button disabled sx={{ml: 2}} variant="contained">查询</Button>
                         </Box>
                         <Table
                             sx={{minWidth: 750}}
@@ -303,54 +360,55 @@ export default function Logrobot({}) {
                                 onRequestSort={handleRequestSort}
                                 rowCount={rows.length}
                             />
-                            <TableBody>
-                                {visibleRows.map((row, index) => {
-                                    const isItemSelected = isSelected(row.id);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    return (<TableRow
-                                        hover
-                                        role="checkbox"
-                                        aria-checked={isItemSelected}
-                                        tabIndex={-1}
-                                        key={row.id_robot}
-                                        selected={isItemSelected}
-                                        sx={{cursor: 'pointer'}}
-                                    >
-                                        <TableCell padding="checkbox">
-                                            <Checkbox
-                                                onClick={(event) => handleClick(event, row.id)}
-                                                color="primary"
-                                                checked={isItemSelected}
-                                                inputProps={{
-                                                    'aria-labelledby': labelId,
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell
-                                            component="th"
-                                            id={labelId}
-                                            scope="row"
-                                            padding="none"
+                            {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
+                                <TableBody>
+                                    {visibleRows.map((row, index) => {
+                                        const isItemSelected = isSelected(row.id);
+                                        const labelId = `enhanced-table-checkbox-${index}`;
+                                        return (<TableRow
+                                            hover
+                                            role="checkbox"
+                                            aria-checked={isItemSelected}
+                                            tabIndex={-1}
+                                            key={row.id}
+                                            selected={isItemSelected}
+                                            sx={{cursor: 'pointer'}}
                                         >
-                                            {row.collection_datetime}
-                                        </TableCell>
-                                        <TableCell align="left">{row.id_robot}</TableCell>
-                                        <TableCell align="left">{row.mapping}</TableCell>
-                                        <TableCell align="left">{row.mission}</TableCell>
-                                        <TableCell align="left">{row.map2d}</TableCell>
-                                        <TableCell align="left">{row.map3d}</TableCell>
-                                        <TableCell align="left">{row.sensor}</TableCell>
+                                            <TableCell padding="checkbox">
+                                                <Checkbox
+                                                    onClick={(event) => handleClick(event, row.id)}
+                                                    color="primary"
+                                                    checked={isItemSelected}
+                                                    inputProps={{
+                                                        'aria-labelledby': labelId,
+                                                    }}
+                                                />
+                                            </TableCell>
+                                            <TableCell
+                                                component="th"
+                                                id={labelId}
+                                                scope="row"
+                                                padding="none"
+                                            >
+                                                {row.collection_datetime}
+                                            </TableCell>
+                                            <TableCell align="left">{row.id_robot}</TableCell>
+                                            <TableCell align="left">{row.mapping}</TableCell>
+                                            <TableCell align="left">{row.mission}</TableCell>
+                                            <TableCell align="left">{row.map2d}</TableCell>
+                                            <TableCell align="left">{row.map3d}</TableCell>
+                                            <TableCell align="left">{row.sensor ? "工作" : "未工作"}</TableCell>
 
-                                    </TableRow>);
-                                })}
-                                {emptyRows > 0 && (<TableRow
-                                    style={{
-                                        height: (dense ? 33 : 53) * emptyRows,
-                                    }}
-                                >
-                                    <TableCell colSpan={6}/>
-                                </TableRow>)}
-                            </TableBody>
+                                        </TableRow>);
+                                    })}
+                                    {emptyRows > 0 && (<TableRow
+                                        style={{
+                                            height: (dense ? 33 : 53) * emptyRows,
+                                        }}
+                                    >
+                                        <TableCell colSpan={6}/>
+                                    </TableRow>)}
+                                </TableBody>)}
                         </Table>
                     </TableContainer>
                     <TablePagination

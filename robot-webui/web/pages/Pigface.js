@@ -15,14 +15,16 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
-import {FormControl, InputBase, InputLabel} from "@mui/material";
+import {CircularProgress, FormControl, InputBase, InputLabel} from "@mui/material";
 import {alpha, styled} from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
+import {useEffect, useState} from "react";
+import TablePagination from "@mui/material/TablePagination";
 
 
-function createData(id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd) {
+function createData(id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd) {
     return {
-        id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd,
+        id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd,
     };
 }
 
@@ -140,9 +142,7 @@ Row.propTypes = {
     }).isRequired,
 };
 
-const rows = [createData('1', "2024年8月26日20时8分", "SYS505R01", "./static/images/rgb.jpg", "./static/images/thermal.jpg", 37, "/static/images/rgbd.jpg"),
 
-];
 const BootstrapInput = styled(InputBase)(({theme}) => ({
     'label + &': {
         marginTop: theme.spacing(3),
@@ -164,56 +164,112 @@ const BootstrapInput = styled(InputBase)(({theme}) => ({
     },
 }));
 export default function Pigface() {
-    return (<Box
-        component="main"
-        sx={{
-            backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
-        }}
-    >
-        <Toolbar/>
-        <Box
-            sx={{
-                display: 'flex', alignItems: 'center', justifyContent: 'left', flexDirection: 'row', // 确保项目在同一行
-                ml: 4, mt: 2, mb: 1
-            }}
-        ><FormControl variant="standard">
-            <InputLabel shrink htmlFor="input-label">
-                输入猪只id
-            </InputLabel>
-            <BootstrapInput defaultValue="" id="bootstrap-input"/>
-        </FormControl>
-            <Button sx={{ml: 2, mt: 3}} variant="contained">查询</Button>
+    const [rows, setRows] = useState([]);
+    const [page, setPage] = useState(0); // 当前页数
+    const [rowsPerPage, setRowsPerPage] = useState(10); // 每页显示的行数
+
+    const extractValidData = (data) => {
+        return {
+            id: data.ID,
+            id_pig: data.IDPig,
+            collection_datetime: data.CollectionDatetime,
+            id_robot: data.IDRobot,
+            rgb: data.CollectionImgRGB.Valid ? data.CollectionImgRGB.String : "N/A",
+            thermal: data.CollectionImgThermal.Valid ? data.CollectionImgThermal.String : "N/A",
+            pigtemp: data.CollectionTemperature.Valid ? data.CollectionTemperature.Float64 : "N/A",
+            rgbd: data.CollectionImgRGBD.Valid ? data.CollectionImgRGBD.String : "N/A",
+        };
+    };
+
+    const getPigFace = async (id_account) => {
+        try {
+            const response = await fetch(`/api/pigfaceall?id_account=${id_account}`, {
+                method: 'GET',
+                headers: {contentType: "application/json"}
+            });
+            if (response.status === 200) {
+                const data = await response.json();
+                const processedRows = data.map(item => {
+                    const processedData = extractValidData(item);
+                    return createData(
+                        processedData.id,
+                        processedData.id_pig,
+                        processedData.collection_datetime,
+                        processedData.id_robot,
+                        processedData.rgb,
+                        processedData.thermal,
+                        processedData.pigtemp,
+                        processedData.rgbd
+                    );
+                });
+                setRows(processedRows);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
+        if (storedAccount) {
+            getPigFace(storedAccount.IDAccount);
+        }
+    }, []);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // 每次改变每页的行数时，重置为第一页
+    };
+
+    const visibleRows = rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+    return (
+        <Box component="main" sx={{flexGrow: 1, height: '100vh', overflow: 'auto'}}>
+            <Toolbar/>
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'left', ml: 4, mt: 2, mb: 1}}>
+                <FormControl variant="standard">
+                    <InputLabel shrink htmlFor="input-label">输入猪只id</InputLabel>
+                    <BootstrapInput defaultValue="" id="bootstrap-input"/>
+                </FormControl>
+                <Button sx={{ml: 2, mt: 3}} disabled variant="contained">查询</Button>
+            </Box>
+            <Paper sx={{m: 4, mt: 0, p: 0, display: 'flex', flexDirection: 'row'}}>
+                <TableContainer component={Paper}>
+                    <Table aria-label="collapsible table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="left">id_pig</TableCell>
+                                <TableCell align="left">采集时间</TableCell>
+                                <TableCell align="left">id_robot</TableCell>
+                                <TableCell align="left">可见光图像</TableCell>
+                                <TableCell align="left">热红外图像</TableCell>
+                                <TableCell align="left">面部温度 (℃)</TableCell>
+                                <TableCell align="left">深度图像</TableCell>
+                                <TableCell/>
+                            </TableRow>
+                        </TableHead>
+                        {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
+                            <TableBody>
+                                {visibleRows.map((row) => (<Row key={row.id} row={row}/>))}
+                            </TableBody>
+                        )}
+                    </Table><TablePagination
+                    component="div"
+                    count={rows.length} // 总行数
+                    page={page} // 当前页码
+                    onPageChange={handleChangePage} // 页码变化
+                    rowsPerPage={rowsPerPage} // 每页显示的行数
+                    onRowsPerPageChange={handleChangeRowsPerPage} // 每页显示的行数变化
+                    labelRowsPerPage="每页行数"
+                    rowsPerPageOptions={[5, 10, 25]} // 可选的每页行数
+                />
+                </TableContainer>
+
+            </Paper>
         </Box>
-        <Paper
-            sx={{
-                m: 4, mt: 0, p: 0, display: 'flex', flexDirection: 'row',
-
-            }}
-        >
-            <TableContainer component={Paper}>
-                <Table aria-label="collapsible table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">id_pig</TableCell>
-                            <TableCell align="left">采集时间</TableCell>
-                            <TableCell align="left">id_robot</TableCell>
-                            <TableCell align="left">可见光图像</TableCell>
-                            <TableCell align="left">热红外图像</TableCell>
-                            <TableCell align="left">面部温度 (℃)</TableCell>
-                            <TableCell align="left">深度图像</TableCell>
-                            <TableCell/>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {rows.map((row) => (<Row key={row.name} row={row}/>))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
-        </Paper>
-    </Box>)
-
+    );
 }
