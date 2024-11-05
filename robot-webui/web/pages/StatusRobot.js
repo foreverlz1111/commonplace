@@ -119,6 +119,7 @@ export default function StatusRobot() {
 
     useEffect(() => {
         try {
+
             const storedAccount = JSON.parse(sessionStorage.getItem('loginAccount'));
             if (storedAccount) {
                 getRobotList(storedAccount.IDAccount)
@@ -217,7 +218,7 @@ export default function StatusRobot() {
                         <CircularProgress size={20} />
                     ) : (
                         <Typography variant="body2" sx={{m: 1}}>
-                            {robotCurrent.StatusNavigating?.String || 'N/A'}
+                            {robotCurrent.StatusNavigatingtask?.String || '(就绪)'}
                         </Typography>
                     )}
                 </Box>

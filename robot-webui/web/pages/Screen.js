@@ -287,7 +287,7 @@ export default function Screen() {
                                 <CircularProgress size={20} />
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent.StatusNavigatingtask?.String || 'N/A'}
+                                    {robotCurrent.StatusNavigatingtask?.String || '(就绪)'}
                                 </Typography>
                             )}
                         </Button>
@@ -361,7 +361,7 @@ export default function Screen() {
                                 <CircularProgress size={20} />
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent?.StatusBatteryIscharging ?"充电中":"未充电" || 'N/A'}
+                                    {robotCurrent.StatusBatteryIscharging?.Int16 === 1 ?("充电中"):("放电中") || 'N/A'}
                                 </Typography>
                             )}
                         </Grid>

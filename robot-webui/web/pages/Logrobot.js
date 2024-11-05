@@ -256,10 +256,12 @@ export default function Logrobot({}) {
     }
     const getRobotCurrentAll = async (id_account) => {
         try {
+            console.log(sessionStorage.getItem('token'));
             const response = await fetch(`/api/robotcurrentall?id_account=${id_account}`, {
                 method: 'GET',
                 headers: {
                     contentType: "application/json",
+                    Authorization: sessionStorage.getItem('token'),
                 }
             })
             if (response.status === 200) {

@@ -71,7 +71,8 @@ export default function Index() {
                 // sessionStorage: 存储的数据只在浏览器会话期间有效，当用户关闭浏览器或标签页时，数据会被清除。
 
                 // 数据固化
-                sessionStorage.setItem("loginAccount",JSON.stringify(data))
+                sessionStorage.setItem("loginAccount",JSON.stringify(data["data"]))
+                sessionStorage.setItem("token",data["token"])
 
                 await router.push('/main');
             } else {
