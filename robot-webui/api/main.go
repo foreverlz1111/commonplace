@@ -4,10 +4,10 @@ import (
 	"api/config"
 	"api/dboutput"
 	_ "api/docs"
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/swaggo/http-swagger"
 	"io"
@@ -18,6 +18,46 @@ import (
 	//"github.com/go-playground/validator/v10" // 检查传回的密码格式
 	"github.com/jmoiron/sqlx"
 )
+
+var jwtKey = []byte("your_secret_key")
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+// GenerateJWT 生成 JWT 令牌
+func GenerateJWT(username string) (string, error) {
+	expirationTime := time.Now().Add(24 * time.Hour) // 设置 JWT 的过期时间
+
+	claims := &Claims{
+		Username: username,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtKey)
+}
+
+// ValidateJWT 验证 JWT 令牌
+func ValidateJWT(tokenStr string) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
+}
 
 type RobotSensor struct {
 	ID                    int             `db:"id"`
@@ -98,27 +138,39 @@ type PigCurrent struct {
 	CollectionImgRGBD     sql.NullString  `db:"collection_img_rgbd"`    // 生猪的深度图像文件路径
 }
 
+// 保护路由
+func jwtMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenStr := r.Header.Get("Authorization")
+		if tokenStr == "" {
+			http.Error(w, "Authorization token not provided", http.StatusUnauthorized)
+			return
+		}
+
+		claims, err := ValidateJWT(tokenStr)
+		if err != nil {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// 将用户名存储在请求上下文中，供后续的处理函数使用
+		ctx := context.WithValue(r.Context(), "username", claims.Username)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}
+
 // @Summary 处理登录请求
 func loginHandler(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries) {
-	// 读取页面put + 鉴别 + 查找 + 返回
 	if r.Method != http.MethodPut {
 		http.Error(w, "Only PUT method is allowed", http.StatusMethodNotAllowed)
+		return
 	}
+
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Failed to read request body", http.StatusBadRequest)
 		return
 	}
-	log.Println("/loginHandler: " + string(body))
-	r.Body = io.NopCloser(bytes.NewBuffer(body))
-
-	//err = r.ParseForm() // 之后可用 r.FromValue()
-	//if err != nil {
-	//	http.Error(w, "Failed to parse form", http.StatusBadRequest)
-	//}
-	//
-	//valueIdAccount := r.FormValue("id_account")
-	//valuePwdAccount := r.FormValue("pwd_account")
 	var webJson map[string]string
 	err = json.Unmarshal(body, &webJson)
 	if err != nil {
@@ -127,39 +179,97 @@ func loginHandler(w http.ResponseWriter, r *http.Request, ctx context.Context, q
 	}
 	valueIdAccount, _ := webJson["id_account"]
 	valuePwdAccount, _ := webJson["pwd_account"]
-	if valueIdAccount == "" {
-		log.Println("Key not found: 'id_account'")
-		http.Error(w, "Key not found: 'id_account'", http.StatusBadRequest)
-		return
-	} else if valuePwdAccount == "" {
-		log.Println("Key not found: 'pwd_account'")
-		http.Error(w, "Key not found: 'pwd_account'", http.StatusBadRequest)
+
+	if valueIdAccount == "" || valuePwdAccount == "" {
+		http.Error(w, "Missing account or password", http.StatusBadRequest)
 		return
 	}
 
+	// 验证用户
 	result, err := query.AccountSearch(ctx, dboutput.AccountSearchParams{
 		IDAccount:  valueIdAccount,
 		PwdAccount: valuePwdAccount,
 	})
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Database Server Error", http.StatusInternalServerError)
-	} else {
-		json.NewEncoder(w).Encode(result) // 测试用
-		if result.IDAccount != "" && result.PwdAccount != "" {
-			// 简单的respond用于测试，不应该返回1个以上的json
-			//response := map[string]string{
-			//	"success": "true",
-			//}
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			//json.NewEncoder(w).Encode(response)
-		} else {
-			w.Header().Set("Content-Type", "application/json")
-			http.Error(w, "Account not found", http.StatusNoContent)
-		}
+	if err != nil || result.IDAccount == "" {
+		http.Error(w, "Invalid account or password", http.StatusUnauthorized)
+		return
 	}
+
+	// 生成 JWT
+	token, err := GenerateJWT(valueIdAccount)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+
+	// 返回 JWT 给客户端
+	w.Header().Set("Content-Type", "application/json")
+	type Response struct {
+		Token string      `json:"token"`
+		Data  interface{} `json:"data"` // 使用 interface{} 支持多种类型
+	}
+	json.NewEncoder(w).Encode(Response{token, result})
+
+	// 读取页面put + 鉴别 + 查找 + 返回
+	//if r.Method != http.MethodPut {
+	//	http.Error(w, "Only PUT method is allowed", http.StatusMethodNotAllowed)
+	//}
+	//body, err := io.ReadAll(r.Body)
+	//if err != nil {
+	//	http.Error(w, "Failed to read request body", http.StatusBadRequest)
+	//	return
+	//}
+	//log.Println("/loginHandler: " + string(body))
+	//r.Body = io.NopCloser(bytes.NewBuffer(body))
+
+	//err = r.ParseForm() // 之后可用 r.FromValue()
+	//if err != nil {
+	//	http.Error(w, "Failed to parse form", http.StatusBadRequest)
+	//}
+
+	//valueIdAccount := r.FormValue("id_account")
+	//valuePwdAccount := r.FormValue("pwd_account")
+	//var webJson map[string]string
+	//err = json.Unmarshal(body, &webJson)
+	//if err != nil {
+	//	http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+	//	return
+	//}
+	//valueIdAccount, _ := webJson["id_account"]
+	//valuePwdAccount, _ := webJson["pwd_account"]
+	//if valueIdAccount == "" {
+	//	log.Println("Key not found: 'id_account'")
+	//	http.Error(w, "Key not found: 'id_account'", http.StatusBadRequest)
+	//	return
+	//} else if valuePwdAccount == "" {
+	//	log.Println("Key not found: 'pwd_account'")
+	//	http.Error(w, "Key not found: 'pwd_account'", http.StatusBadRequest)
+	//	return
+	//}
+	//
+	//result, err := query.AccountSearch(ctx, dboutput.AccountSearchParams{
+	//	IDAccount:  valueIdAccount,
+	//	PwdAccount: valuePwdAccount,
+	//})
+	//
+	//if err != nil {
+	//	log.Println(err)
+	//	http.Error(w, "Database Server Error", http.StatusInternalServerError)
+	//} else {
+	//	json.NewEncoder(w).Encode(result) // 测试用
+	//	if result.IDAccount != "" && result.PwdAccount != "" {
+	//		// 简单的respond用于测试，不应该返回1个以上的json
+	//		//response := map[string]string{
+	//		//	"success": "true",
+	//		//}
+	//		w.Header().Set("Content-Type", "application/json")
+	//		w.WriteHeader(http.StatusOK)
+	//		//json.NewEncoder(w).Encode(response)
+	//	} else {
+	//		w.Header().Set("Content-Type", "application/json")
+	//		http.Error(w, "Account not found", http.StatusNoContent)
+	//	}
+	//}
 }
 
 // @Summary 根据id查找名下的机器人id[]
@@ -404,9 +514,9 @@ func main() {
 	http.HandleFunc("/myrobotsensorscreen", func(w http.ResponseWriter, r *http.Request) {
 		myrobotSensorScreen(w, r, ctx, query)
 	})
-	http.HandleFunc("/robotcurrentall", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/robotcurrentall", jwtMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		robotCurrentAll(w, r, ctx, query, sqlxdb)
-	})
+	}))
 	http.HandleFunc("/pigfaceall", func(w http.ResponseWriter, r *http.Request) {
 		pigFaceAll(w, r, ctx, query, sqlxdb)
 	})
