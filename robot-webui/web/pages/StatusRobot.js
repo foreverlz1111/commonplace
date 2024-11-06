@@ -306,7 +306,7 @@ export default function StatusRobot() {
                         <Divider component="li"/><ListItem>
                         <Grid container alignItems="center">
                             <Grid item xs={8}>
-                                <Typography align="left">电池温压：</Typography>
+                                <Typography align="left">电池电压：</Typography>
                             </Grid>
                             <Grid item>
                                 {!robotCurrent ? (

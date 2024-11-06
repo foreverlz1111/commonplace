@@ -86,7 +86,7 @@
 |collection_img_thermal |文件路径 拍摄的生猪的热红外图像 |**VARCHAR(200)** <br> null | 
 |collection_temperature |生猪的面部温度，取最高值 |**FLOAT** <br> null | 
 |collection_img_rgbd |文件路径 拍摄的生猪的深度图像 |**VARCHAR(200)** <br> null | 
-
+|collection_img_camera |文件路径 拍摄的相机实时画面 |**VARCHAR(200)** <br> null | 
 * 表 ROBOT_INFO
 
 | 字段 | 备注 | 数据类型 |
