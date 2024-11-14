@@ -4,9 +4,11 @@ import (
 	"api/config"
 	"api/dboutput"
 	_ "api/docs"
+	"api/myoss"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/swaggo/http-swagger"
@@ -14,7 +16,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	//"github.com/go-playground/validator/v10" // 检查传回的密码格式
 	"github.com/jmoiron/sqlx"
 )
@@ -136,6 +137,7 @@ type PigCurrent struct {
 	CollectionImgThermal  sql.NullString  `db:"collection_img_thermal"` // 生猪的热红外图像文件路径
 	CollectionTemperature sql.NullFloat64 `db:"collection_temperature"` // 生猪的面部温度，取最高值
 	CollectionImgRGBD     sql.NullString  `db:"collection_img_rgbd"`    // 生猪的深度图像文件路径
+	CollectionImgCamera   sql.NullString  `db:"collection_img_camera"`  // 相机
 }
 
 // 保护路由
@@ -444,9 +446,9 @@ func pigFaceAll(w http.ResponseWriter, r *http.Request, ctx context.Context, que
 	} else {
 		log.Println("result", result, " Search")
 	}
-	sqlxquery, args, err := sqlx.In("SELECT * FROM pig_current WHERE id_robot IN (?);", result)
+	sqlxquery, args, err := sqlx.In("SELECT * FROM pig_current WHERE id_robot IN (?) ORDER BY `collection_datetime` DESC;", result)
 	if err != nil {
-		log.Println("sqlxquery", err)
+		log.Println("sqlx query:", err)
 	}
 	sqlxquery = sqlxdb.Rebind(sqlxquery)
 	var pigcurrent []PigCurrent
@@ -454,7 +456,7 @@ func pigFaceAll(w http.ResponseWriter, r *http.Request, ctx context.Context, que
 	if err != nil {
 		log.Println("SelectContext", err)
 	} else {
-		log.Println("pigcurrent")
+		//log.Println("pigcurrent ", pigcurrent[:3])
 		json.NewEncoder(w).Encode(pigcurrent)
 	}
 }
@@ -478,6 +480,20 @@ func myrobotSensorScreen(w http.ResponseWriter, r *http.Request, ctx context.Con
 		json.NewEncoder(w).Encode(result)
 	}
 }
+
+func getOSSUrl(w http.ResponseWriter, r *http.Request, client *oss.Client) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+	filname := urlquery.Get("filename")
+	log.Println("find: ", filname)
+	ossurl := myoss.GetOSSUrl(client, filname)
+	data := map[string]string{
+		"ossurl": ossurl,
+	}
+	json.NewEncoder(w).Encode(data)
+}
 func main() {
 	ctx := context.Background()
 	connectedDatabase, err := sql.Open("mysql", config.DBconfig_user+config.DBconfig_password+config.DBconfig_url+config.DBconfig_dbname+"?parseTime=true")
@@ -493,6 +509,12 @@ func main() {
 		log.Println("sqlx DB opened")
 	}
 	query := dboutput.New(connectedDatabase)
+
+	ossclient, err := myoss.Init()
+	if err != nil {
+		log.Println("err", err)
+	}
+
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		loginHandler(w, r, ctx, query)
 	})
@@ -521,6 +543,9 @@ func main() {
 		pigFaceAll(w, r, ctx, query, sqlxdb)
 	})
 	http.HandleFunc("/doc/", httpSwagger.WrapHandler)
+	http.HandleFunc("/getossurl", jwtMiddleware(func(w http.ResponseWriter, r *http.Request) {
+		getOSSUrl(w, r, ossclient)
+	}))
 	log.Println("Listening on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

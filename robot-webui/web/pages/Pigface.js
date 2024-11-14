@@ -22,15 +22,77 @@ import {useEffect, useState} from "react";
 import TablePagination from "@mui/material/TablePagination";
 
 
-function createData(id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd) {
+function createData(id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd, camera) {
     return {
-        id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd,
+        id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd, camera
     };
 }
+
+const fetchImageUrl = async (filename) => {
+    try {
+        const response = await fetch(`/api/getossurl?filename=${filename}`,{
+            method: 'GET',
+            headers: {
+                contentType: "application/json",
+                Authorization: sessionStorage.getItem('token'),
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.ossurl;
+        } else {
+            console.error("Failed to fetch image URL");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching image URL:", error);
+        return null;
+    }
+};
 
 function Row(props) {
     const {row} = props;
     const [open, setOpen] = React.useState(false);
+    const [rgburl, setRGBUrl] = useState("");
+    const [thermalurl, setThermalUrl] = useState("");
+    const [cameraurl, setCameraUrl] = useState("");
+    // console.log(row)
+    useEffect(() => {
+        if (open && row.rgb) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+            const loadImage = async () => {
+                const url = await fetchImageUrl(row.rgb);
+                setRGBUrl(url);
+            };
+            loadImage();
+        } else {
+            setRGBUrl("");  // 如果折叠关闭，则清空图片 URL
+        }
+    }, [open, row.rgb]);
+
+    useEffect(() => {
+        if (open && row.thermal) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+            const loadImage = async () => {
+                const url = await fetchImageUrl(row.thermal);
+                setThermalUrl(url);
+            };
+            loadImage();
+        } else {
+            setThermalUrl("");  // 如果折叠关闭，则清空图片 URL
+        }
+    }, [open, row.thermal]);
+
+    useEffect(() => {
+        if (open && row.rgb) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+            const loadImage = async () => {
+                const url = await fetchImageUrl(row.camera);
+                setCameraUrl(url);
+            };
+            loadImage();
+        } else {
+            setCameraUrl("");  // 如果折叠关闭，则清空图片 URL
+        }
+    }, [open, row.camera]);
 
     return (<React.Fragment>
         <TableRow sx={{'& > *': {borderBottom: 'unset'}}}>
@@ -73,7 +135,7 @@ function Row(props) {
                             <Grid item xs={4} display="flex" justifyContent="center">
                                 <Box sx={{textAlign: 'center'}}>
                                     <img
-                                        src={row.rgb}
+                                        src={rgburl}
                                         alt="image-1"
                                         style={{
                                             maxWidth: '100%',   // 最大宽度不超过父容器
@@ -89,7 +151,7 @@ function Row(props) {
                             <Grid item xs={4} display="flex" justifyContent="center">
                                 <Box sx={{textAlign: 'center'}}>
                                     <img
-                                        src={row.thermal}
+                                        src={thermalurl}
                                         alt="image-2"
                                         style={{
                                             maxWidth: '100%',   // 最大宽度不超过父容器
@@ -105,7 +167,7 @@ function Row(props) {
                             <Grid item xs={4} display="flex" justifyContent="center">
                                 <Box sx={{textAlign: 'center'}}>
                                     <img
-                                        src={row.rgbd}
+                                        src={cameraurl}
                                         alt="image-3"
                                         style={{
                                             maxWidth: '100%',   // 最大宽度不超过父容器
@@ -115,7 +177,7 @@ function Row(props) {
                                             borderRadius: '8px', // 圆角效果
                                         }}
                                     />
-                                    <Typography variant="caption" display="block">深度图像</Typography>
+                                    <Typography variant="caption" display="block">相机</Typography>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -178,6 +240,7 @@ export default function Pigface() {
             thermal: data.CollectionImgThermal.Valid ? data.CollectionImgThermal.String : "N/A",
             pigtemp: data.CollectionTemperature.Valid ? data.CollectionTemperature.Float64 : "N/A",
             rgbd: data.CollectionImgRGBD.Valid ? data.CollectionImgRGBD.String : "N/A",
+            camera: data.CollectionImgCamera.Valid ? data.CollectionImgCamera.String : "N/A",
         };
     };
 
@@ -191,6 +254,7 @@ export default function Pigface() {
                 const data = await response.json();
                 const processedRows = data.map(item => {
                     const processedData = extractValidData(item);
+
                     return createData(
                         processedData.id,
                         processedData.id_pig,
@@ -199,7 +263,8 @@ export default function Pigface() {
                         processedData.rgb,
                         processedData.thermal,
                         processedData.pigtemp,
-                        processedData.rgbd
+                        processedData.rgbd,
+                        processedData.camera
                     );
                 });
                 setRows(processedRows);
@@ -257,16 +322,17 @@ export default function Pigface() {
                                 {visibleRows.map((row) => (<Row key={row.id} row={row}/>))}
                             </TableBody>
                         )}
-                    </Table><TablePagination
-                    component="div"
-                    count={rows.length} // 总行数
-                    page={page} // 当前页码
-                    onPageChange={handleChangePage} // 页码变化
-                    rowsPerPage={rowsPerPage} // 每页显示的行数
-                    onRowsPerPageChange={handleChangeRowsPerPage} // 每页显示的行数变化
-                    labelRowsPerPage="每页行数"
-                    rowsPerPageOptions={[5, 10, 25]} // 可选的每页行数
-                />
+                    </Table>
+                    <TablePagination
+                        component="div"
+                        count={rows.length} // 总行数
+                        page={page} // 当前页码
+                        onPageChange={handleChangePage} // 页码变化
+                        rowsPerPage={rowsPerPage} // 每页显示的行数
+                        onRowsPerPageChange={handleChangeRowsPerPage} // 每页显示的行数变化
+                        labelRowsPerPage="每页行数"
+                        rowsPerPageOptions={[5, 10, 25]} // 可选的每页行数
+                    />
                 </TableContainer>
 
             </Paper>
