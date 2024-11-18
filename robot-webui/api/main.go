@@ -384,7 +384,7 @@ func myRobotSensor(w http.ResponseWriter, r *http.Request, ctx context.Context, 
 		log.Println("result", result, " Search")
 	}
 
-	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_sensor WHERE id_robot IN (?);", result)
+	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_sensor WHERE id_robot IN (?) ORDER BY `collection_datetime` DESC;", result)
 	if err != nil {
 		log.Println("sqlxquery", err)
 	}
@@ -457,6 +457,30 @@ func pigFaceAll(w http.ResponseWriter, r *http.Request, ctx context.Context, que
 		log.Println("SelectContext", err)
 	} else {
 		//log.Println("pigcurrent ", pigcurrent[:3])
+		json.NewEncoder(w).Encode(pigcurrent)
+	}
+}
+func pigFaceOne(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries, sqlxdb *sqlx.DB) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+
+	valueIdRobot := urlquery.Get("id_robot")
+	if valueIdRobot == "" {
+		log.Println("Key not found: 'id_robot'")
+	}
+
+	sqlxquery, args, err := sqlx.In("SELECT * FROM pig_current WHERE id_robot = (?) ORDER BY `collection_datetime` DESC LIMIT 1;", valueIdRobot)
+	if err != nil {
+		log.Println("sqlx query:", err)
+	}
+	sqlxquery = sqlxdb.Rebind(sqlxquery)
+	var pigcurrent []PigCurrent
+	err = sqlxdb.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
+	if err != nil {
+		log.Println("SelectContext", err)
+	} else {
 		json.NewEncoder(w).Encode(pigcurrent)
 	}
 }
@@ -541,6 +565,9 @@ func main() {
 	}))
 	http.HandleFunc("/pigfaceall", func(w http.ResponseWriter, r *http.Request) {
 		pigFaceAll(w, r, ctx, query, sqlxdb)
+	})
+	http.HandleFunc("/pigfaceone", func(w http.ResponseWriter, r *http.Request) {
+		pigFaceOne(w, r, ctx, query, sqlxdb)
 	})
 	http.HandleFunc("/doc/", httpSwagger.WrapHandler)
 	http.HandleFunc("/getossurl", jwtMiddleware(func(w http.ResponseWriter, r *http.Request) {

@@ -20,16 +20,21 @@ import SavingsIcon from '@mui/icons-material/Savings';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
 import HistoryIcon from '@mui/icons-material/History';
 import {useEffect, useState} from "react";
+import {fetchImageUrl} from "./Pigface";
 
 
 export default function Screen() {
     const [robotList, setRobotList] = useState([]);
     const [selectedRobot, setSelectedRobot] = useState('');
     const [robotCurrent, setRobotCurrent] = useState();
-    const [temp,setTemp] = useState([]);
-    const [humid,setHumid] = useState([]);
-    const [sensordata,setSensordata] = useState([])
+    const [temp, setTemp] = useState([]);
+    const [humid, setHumid] = useState([]);
+    const [sensordata, setSensordata] = useState([])
 
+    const [latestpig, setLatestPig] = useState([]);
+    const [rgburl, setRGBUrl] = useState("");
+    const [thermalurl, setThermalUrl] = useState("");
+    const [cameraurl, setCameraUrl] = useState("");
     const handleRobotChange = (event) => {
         setSelectedRobot(event.target.value);
     };
@@ -62,11 +67,10 @@ export default function Screen() {
         try {
             const response = await fetch(`/api/myrobotsensorscreen?id_robot=${id_robot}`, {
                 method: 'GET',
-                headers: { contentType: "application/json" }
+                headers: {contentType: "application/json"}
             });
             if (response.status === 200) {
                 const data = await response.json();
-
                 setTemp(data.map(item => item.CollectionTemperature.Float64))
                 setHumid(data.map(item => item.CollectionHumidity.Float64))
                 setSensordata(data)
@@ -97,6 +101,28 @@ export default function Screen() {
             console.log('请求失败:', error);
         }
     }
+    const getRobotPigCurrent = async (id_robot) => {
+        try {
+            const response = await fetch(`/api/pigfaceone?id_robot=${id_robot}`, {
+                method: 'GET',
+                headers: {contentType: "application/json"}
+            });
+            if (response.status === 200) {
+                const data = await response.json();
+                setLatestPig(data[0])
+                console.log(data[0])
+                const rgburl = await fetchImageUrl(data[0].CollectionImgRGB.String);
+                const thermalurl = await fetchImageUrl(data[0].CollectionImgThermal.String);
+                const cameraurl = await fetchImageUrl(data[0].CollectionImgCamera.String);
+                setRGBUrl(rgburl);
+                setThermalUrl(thermalurl);
+                setCameraUrl(cameraurl)
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const getRobotList = async (id_account) => {
         // 读取机器人列表
         await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -115,6 +141,7 @@ export default function Screen() {
                 setSelectedRobot(data[0])
                 await getRobotCurrent(data[0])
                 await getRobotSensor(data[0])
+                await getRobotPigCurrent(data[0])
             } else {
                 const errorData = await response.json();
                 console.log('错误:', errorData);
@@ -273,7 +300,7 @@ export default function Screen() {
                                 startIcon={<MapRoundedIcon/>}>
                             <Typography variant={"h6"}>导航地图：</Typography>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
                                     {robotCurrent.StatusNavigatingmap?.String || 'N/A'}
@@ -284,7 +311,7 @@ export default function Screen() {
                                 startIcon={<PinDropRoundedIcon/>}>
                             <Typography variant={"h6"}>导航任务：</Typography>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
                                     {robotCurrent.StatusNavigatingtask?.String || '(就绪)'}
@@ -311,7 +338,7 @@ export default function Screen() {
                                 <Typography variant={"h6"}>电池电量</Typography>
                             </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
                                     {robotCurrent.StatusBatteryPower?.Int16 || 'N/A'} %
@@ -335,7 +362,7 @@ export default function Screen() {
                                 <Typography variant={"h6"}>电池健康</Typography>
                             </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
                                     {robotCurrent.StatusBatteryHealth?.Int16 || 'N/A'} %
@@ -358,10 +385,10 @@ export default function Screen() {
                                 <Typography variant={"h6"}>充电状态</Typography>
                             </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent.StatusBatteryIscharging?.Int16 === 1 ?("充电中"):("放电中") || 'N/A'}
+                                    {robotCurrent.StatusBatteryIscharging?.Int16 === 1 ? ("充电中") : ("放电中") || 'N/A'}
                                 </Typography>
                             )}
                         </Grid>
@@ -392,10 +419,10 @@ export default function Screen() {
                                 <Typography variant={"h6"}>电池电流 (A)</Typography>
                             </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent.StatusBatteryCur?.Float64  || 'N/A'}
+                                    {robotCurrent.StatusBatteryCur?.Float64 || 'N/A'}
                                 </Typography>
                             )}
                         </Grid>
@@ -415,13 +442,13 @@ export default function Screen() {
                             <Typography variant={"h6"}>电池电压 (V)</Typography>
                         </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent.StatusBatteryVol?.Float64  || 'N/A'}
+                                    {robotCurrent.StatusBatteryVol?.Float64 || 'N/A'}
                                 </Typography>
                             )}
-                            </Grid>
+                        </Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
                             width: "80%",
@@ -438,10 +465,10 @@ export default function Screen() {
                             <Typography variant={"h6"}>总充电小时：</Typography>
                         </IconButton>
                             {!robotCurrent ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress size={20}/>
                             ) : (
                                 <Typography variant="h6" sx={{m: 1}}>
-                                    {robotCurrent.StatusBatteryChargehour?.Float64  || 'N/A'}
+                                    {robotCurrent.StatusBatteryChargehour?.Float64 || 'N/A'}
                                 </Typography>
                             )}
                         </Grid>
@@ -476,7 +503,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={"/static/images/rgb.jpg"}
+                                    src={rgburl ? rgburl : "/static/images/rgb.jpg"}
                                     alt="image-1"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
@@ -492,7 +519,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={"/static/images/thermal.jpg"}
+                                    src={thermalurl ? thermalurl : "/static/images/thermal.jpg"}
                                     alt="image-2"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
@@ -508,7 +535,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={"/static/images/rgbd.jpg"}
+                                    src={cameraurl ? cameraurl : "/static/images/rgbd.jpg"}
                                     alt="image-3"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
@@ -518,7 +545,7 @@ export default function Screen() {
                                         borderRadius: '8px', // 圆角效果
                                     }}
                                 />
-                                <Typography variant="body1" display="block">深度图像</Typography>
+                                <Typography variant="body1" display="block">相机</Typography>
                             </Box>
                         </Grid>
                     </Grid>
@@ -547,7 +574,7 @@ export default function Screen() {
                                 <SavingsIcon/>
                                 <Typography variant={"h6"}>生猪id</Typography>
                             </IconButton>
-                            <Typography variant={"h6"}>1</Typography>
+                            <Typography variant={"h6"}>{latestpig?.ID || 'N/A'}</Typography>
                         </Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
@@ -564,7 +591,7 @@ export default function Screen() {
                             <ThermostatIcon/>
                             <Typography variant={"h6"}>生猪体温 (℃)</Typography>
                         </IconButton>
-                            <Typography variant={"h6"}>1</Typography></Grid>
+                            <Typography variant={"h6"}>{latestpig.CollectionTemperature?.Float64 || 'N/A'}</Typography></Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
                             width: "80%",
@@ -580,7 +607,8 @@ export default function Screen() {
                             <HistoryIcon/>
                             <Typography variant={"h6"}></Typography>
                         </IconButton>
-                            <Typography variant={"h6"}>220</Typography></Grid>
+                            <Typography
+                                variant={"h6"}>{latestpig?.CollectionDatetime || "2024-01-01T18:08:52Z"}</Typography></Grid>
                     </Grid>
 
                 </Grid>
