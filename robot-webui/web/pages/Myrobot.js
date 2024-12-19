@@ -339,156 +339,156 @@ export default function Myrobot() {
                 ml: 4, mt: 2
             }}
         >
-            <Box sx={{mb: 1}} name={"table_modify"}>
-                <Button sx={{mr: 1}} variant="contained" onClick={handleAddButtonStatusOpen}
-                        startIcon={<Add/>}>新增</Button>
-                <Dialog
-                    open={AddButtonStatus}
-                    onClose={handleAddButtonStatusClose}
-                    PaperProps={{
-                        component: 'form', onSubmit: (event) => {
-                            event.preventDefault();
-                            const formData = new FormData(event.currentTarget);
-                            const formJson = Object.fromEntries(formData.entries());
-                            const email = formJson.email;
-                            console.log(email);
-                            handleAddButtonStatusClose();
-                        },
-                    }}
-                >
-                    <DialogTitle>新增机器人</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            请输入信息
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="id_robot_input"
-                            name="id_robot"
-                            label="id_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="owner_robot_input"
-                            name="owner_robot"
-                            label="owner_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
+            {/*<Box sx={{mb: 1}} name={"table_modify"}>*/}
+            {/*    <Button sx={{mr: 1}} variant="contained" onClick={handleAddButtonStatusOpen}*/}
+            {/*            startIcon={<Add/>}>新增</Button>*/}
+            {/*    <Dialog*/}
+            {/*        open={AddButtonStatus}*/}
+            {/*        onClose={handleAddButtonStatusClose}*/}
+            {/*        PaperProps={{*/}
+            {/*            component: 'form', onSubmit: (event) => {*/}
+            {/*                event.preventDefault();*/}
+            {/*                const formData = new FormData(event.currentTarget);*/}
+            {/*                const formJson = Object.fromEntries(formData.entries());*/}
+            {/*                const email = formJson.email;*/}
+            {/*                console.log(email);*/}
+            {/*                handleAddButtonStatusClose();*/}
+            {/*            },*/}
+            {/*        }}*/}
+            {/*    >*/}
+            {/*        <DialogTitle>新增机器人</DialogTitle>*/}
+            {/*        <DialogContent>*/}
+            {/*            <DialogContentText>*/}
+            {/*                请输入信息*/}
+            {/*            </DialogContentText>*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="id_robot_input"*/}
+            {/*                name="id_robot"*/}
+            {/*                label="id_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="owner_robot_input"*/}
+            {/*                name="owner_robot"*/}
+            {/*                label="owner_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
 
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="product_robot_input"
-                            name="product_robot"
-                            label="product_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="ship_robot_input"
-                            name="ship_robot"
-                            label="ship_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="born_robot_input"
-                            name="born_robot"
-                            label="born_robot"
-                            type="date"
-                            fullWidth
-                            variant="outlined"
-                            InputLabelProps={{
-                                shrink: true, // 确保 label 在有值时收缩到上方
-                            }}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="product_robot_input"*/}
+            {/*                name="product_robot"*/}
+            {/*                label="product_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="ship_robot_input"*/}
+            {/*                name="ship_robot"*/}
+            {/*                label="ship_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="born_robot_input"*/}
+            {/*                name="born_robot"*/}
+            {/*                label="born_robot"*/}
+            {/*                type="date"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*                InputLabelProps={{*/}
+            {/*                    shrink: true, // 确保 label 在有值时收缩到上方*/}
+            {/*                }}*/}
 
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="owner_robot_input"
-                            name="owner_robot"
-                            label="owner_robot"
-                            type="date"
-                            fullWidth
-                            variant="outlined"
-                            InputLabelProps={{
-                                shrink: true, // 确保 label 在有值时收缩到上方
-                            }}
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="equip_cpu_robot_input"
-                            name="equip_cpu_robot"
-                            label="equip_cpu_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="equip_gpu_robot_input"
-                            name="equip_gpu_robot"
-                            label="equip_gpu_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="equip_equipment_robot_input"
-                            name="equip_equipment_robot"
-                            label="equip_equipment_robot"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                        />
-                        <TextField
-                            autoFocus
-                            required
-                            margin="dense"
-                            id="price_robot_input"
-                            name="price_robot"
-                            label="price_robot"
-                            type="number"
-                            fullWidth
-                            variant="outlined"
-                        />
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="owner_robot_input"*/}
+            {/*                name="owner_robot"*/}
+            {/*                label="owner_robot"*/}
+            {/*                type="date"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*                InputLabelProps={{*/}
+            {/*                    shrink: true, // 确保 label 在有值时收缩到上方*/}
+            {/*                }}*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="equip_cpu_robot_input"*/}
+            {/*                name="equip_cpu_robot"*/}
+            {/*                label="equip_cpu_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="equip_gpu_robot_input"*/}
+            {/*                name="equip_gpu_robot"*/}
+            {/*                label="equip_gpu_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="equip_equipment_robot_input"*/}
+            {/*                name="equip_equipment_robot"*/}
+            {/*                label="equip_equipment_robot"*/}
+            {/*                type="text"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
+            {/*            <TextField*/}
+            {/*                autoFocus*/}
+            {/*                required*/}
+            {/*                margin="dense"*/}
+            {/*                id="price_robot_input"*/}
+            {/*                name="price_robot"*/}
+            {/*                label="price_robot"*/}
+            {/*                type="number"*/}
+            {/*                fullWidth*/}
+            {/*                variant="outlined"*/}
+            {/*            />*/}
 
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleAddButtonStatusClose}>取消</Button>
-                        <Button disabled type="submit">提交</Button>
-                    </DialogActions>
-                </Dialog>
-                <Button sx={{mr: 1}} variant="contained" startIcon={<Delete/>} color="error" disabled>删除</Button>
-                <Button sx={{mr: 1}} variant="contained" startIcon={<Edit/>} color="success" disabled>编辑</Button>
-            </Box>
+            {/*        </DialogContent>*/}
+            {/*        <DialogActions>*/}
+            {/*            <Button onClick={handleAddButtonStatusClose}>取消</Button>*/}
+            {/*            <Button disabled type="submit">提交</Button>*/}
+            {/*        </DialogActions>*/}
+            {/*    </Dialog>*/}
+            {/*    <Button sx={{mr: 1}} variant="contained" startIcon={<Delete/>} color="error" disabled>删除</Button>*/}
+            {/*    <Button sx={{mr: 1}} variant="contained" startIcon={<Edit/>} color="success" disabled>编辑</Button>*/}
+            {/*</Box>*/}
         </Box>
         <Paper
             sx={{
@@ -551,32 +551,32 @@ export default function Myrobot() {
                                             <TableCell align="left">{row.product_robot}</TableCell>
                                             <TableCell align="left">{row.price_robot}</TableCell>
                                             <TableCell align="left">{row.equip_equipment_robot}</TableCell>
-                                            <TableCell align="left">
-                                                <Button
-                                                    id="demo-customized-button"
-                                                    aria-controls={open ? 'demo-customized-menu' : undefined}
-                                                    aria-haspopup="true"
-                                                    aria-expanded={open ? 'true' : undefined}
-                                                    variant="contained"
-                                                    disableElevation
-                                                    endIcon={<KeyboardArrowDownIcon/>}
-                                                    onClick={handlemenuClick}
-                                                >
-                                                    操作
-                                                </Button>
-                                                <Menu
-                                                    id="basic-menu"
-                                                    anchorEl={anchorEl}
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    MenuListProps={{
-                                                        'aria-labelledby': 'basic-button',
-                                                    }}
-                                                >
-                                                    <MenuItem onClick={handleClose} disabled>删除</MenuItem>
-                                                    <MenuItem onClick={handleClose} disabled>编辑</MenuItem>
-                                                </Menu><
-                                                    /TableCell>
+                                            {/*<TableCell align="left">*/}
+                                            {/*    <Button*/}
+                                            {/*        id="demo-customized-button"*/}
+                                            {/*        aria-controls={open ? 'demo-customized-menu' : undefined}*/}
+                                            {/*        aria-haspopup="true"*/}
+                                            {/*        aria-expanded={open ? 'true' : undefined}*/}
+                                            {/*        variant="contained"*/}
+                                            {/*        disableElevation*/}
+                                            {/*        endIcon={<KeyboardArrowDownIcon/>}*/}
+                                            {/*        onClick={handlemenuClick}*/}
+                                            {/*    >*/}
+                                            {/*        操作*/}
+                                            {/*    </Button>*/}
+                                            {/*    <Menu*/}
+                                            {/*        id="basic-menu"*/}
+                                            {/*        anchorEl={anchorEl}*/}
+                                            {/*        open={open}*/}
+                                            {/*        onClose={handleClose}*/}
+                                            {/*        MenuListProps={{*/}
+                                            {/*            'aria-labelledby': 'basic-button',*/}
+                                            {/*        }}*/}
+                                            {/*    >*/}
+                                            {/*        <MenuItem onClick={handleClose} disabled>删除</MenuItem>*/}
+                                            {/*        <MenuItem onClick={handleClose} disabled>编辑</MenuItem>*/}
+                                            {/*    </Menu><*/}
+                                            {/*        /TableCell>*/}
                                         </TableRow>);
                                     })}
                                     {emptyRows > 0 && (<TableRow
@@ -601,6 +601,7 @@ export default function Myrobot() {
                     />
                 </Paper>
                 <FormControlLabel
+                    sx={{ml:1}}
                     control={<Switch checked={dense} onChange={handleChangeDense}/>}
                     label="紧凑视图"
                 />
