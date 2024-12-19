@@ -21,15 +21,15 @@ import Switch from '@mui/material/Switch';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import {visuallyHidden} from '@mui/utils';
 import Button from "@mui/material/Button";
-import {SmartToy} from "@mui/icons-material";
+import {Refresh, SmartToy} from "@mui/icons-material";
 import TextField from "@mui/material/TextField";
 import {DatePicker, LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from "dayjs";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {NextResponse as response} from "next/server";
 import {CircularProgress} from "@mui/material";
-
+import {useRef} from 'react';
 
 function createData(id, collection_datetime, id_robot, collection_imu, collection_lidar_2d, collection_lidar_3d, collection_rgb, collection_thermal, collection_depth) {
     return {
@@ -187,12 +187,16 @@ EnhancedTableToolbar.propTypes = {
 export default function Mysensor({}) {
     const [rows, setRows] = React.useState([]);
 
-    const [order, setOrder] = React.useState('asc');
+    const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('collection_datetime');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+    const [beginDate, setBeginDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [searching, setSearching] = useState(false);
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -267,8 +271,57 @@ export default function Mysensor({}) {
             collection_depth: data.CollectionDepth.Valid ? data.CollectionDepth.String : "N/A"
         };
     }
+    const searchSensorByDate = async () => {
+        // console.log('起始日:', beginDate ? beginDate.format('YYYY-MM-DD') : '未选择');
+        // console.log('结束日:', endDate ? endDate.format('YYYY-MM-DD') : '未选择');
+        const formattedBeginDate = beginDate ? beginDate.format('YYYY-MM-DD') : null;
+        const formattedEndDate = endDate ? endDate.format('YYYY-MM-DD') : null;
 
+        if (formattedBeginDate && formattedEndDate) {
+            var id_account = JSON.parse(sessionStorage.getItem('loginAccount')).IDAccount
+            setSearching(true)
+            try {
+                const response = await fetch(`/api/myrobotsensorbydate?id_account=${id_account}&begin_date=${formattedBeginDate}&end_date=${formattedEndDate}`, {
+                    method: 'GET',
+                    headers: {
+                        contentType: "application/json",
+                    }
+                })
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    if (Array.isArray(data)) {
+                        console.log('根据日期 获取我的机器人传感器信息成功:', data);
+                        const processedRows = data.map(item => {
+                            const processedData = extractValidData(item);
+                            return createData(
+                                processedData.id,
+                                processedData.collection_datetime,
+                                processedData.id_robot,
+                                processedData.collection_imu,
+                                processedData.collection_lidar_2d,
+                                processedData.collection_lidar_3d,
+                                processedData.collection_rgb,
+                                processedData.collection_thermal,
+                                processedData.collection_depth,
+                            );
+                        });
+                        setRows(processedRows);
+                    } else {
+                        setRows([]);
+                        console.log('data 不存在');
+                    }
+                }
+                setSearching(false)
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+
+    }
     const getMyRobotSensor = async (id_account) => {
+        setSearching(true)
         try {
             const response = await fetch(`/api/myrobotsensor?id_account=${id_account}`, {
                 method: 'GET',
@@ -279,22 +332,27 @@ export default function Mysensor({}) {
             if (response.status === 200) {
                 const data = await response.json();
                 console.log('获取我的机器人传感器信息成功:', data);
-                const processedRows = data.map(item => {
-                    const processedData = extractValidData(item);
-                    return createData(
-                        processedData.id,
-                        processedData.collection_datetime,
-                        processedData.id_robot,
-                        processedData.collection_imu,
-                        processedData.collection_lidar_2d,
-                        processedData.collection_lidar_3d,
-                        processedData.collection_rgb,
-                        processedData.collection_thermal,
-                        processedData.collection_depth,
-                    );
-                });
-                setRows(processedRows);
+                if (Array.isArray(data)) {
+                    const processedRows = data.map(item => {
+                        const processedData = extractValidData(item);
+                        return createData(
+                            processedData.id,
+                            processedData.collection_datetime,
+                            processedData.id_robot,
+                            processedData.collection_imu,
+                            processedData.collection_lidar_2d,
+                            processedData.collection_lidar_3d,
+                            processedData.collection_rgb,
+                            processedData.collection_thermal,
+                            processedData.collection_depth,
+                        );
+                    });
+                    setRows(processedRows);
+                } else {
+                    console.log('data 不存在');
+                }
             }
+            setSearching(false)
         } catch (error) {
             console.log(error)
         }
@@ -311,6 +369,7 @@ export default function Mysensor({}) {
             console.error('Error reading loginAccount from sessionStorage:', error);
         }
     }, []);
+
     return (<Box
         component="main"
         sx={{
@@ -351,15 +410,28 @@ export default function Mysensor({}) {
                             }}>
                             <Typography sx={{ml: 2}} variant="outlined">选择日期：</Typography>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker label="起始日" value={dayjs().subtract(1, 'day')}/>
+                                {/*<DatePicker label="起始日" value={dayjs().subtract(1, 'day')}/>*/}
+                                <DatePicker label="选择起始日" name="begin_date" value={beginDate}
+                                            onChange={(newValue) => setBeginDate(newValue)}/>
                                 <Typography sx={{ml: 1, mr: 1}}>-</Typography>
-                                <DatePicker label="结束日" value={dayjs()}/>
+
+                                {/*<DatePicker label="结束日" value={dayjs()}/>*/}
+                                <DatePicker label="选择结束日" name="end_date" value={endDate}
+                                            onChange={(newValue) => setEndDate(newValue)}/>
                             </LocalizationProvider>
-                            <Box sx={{ml: 2, display: 'flex', alignItems: 'flex-end'}}>
-                                <SmartToy sx={{color: 'action.active', mr: 1, my: 0.5}}/>
-                                <TextField id="input-with-sx" label="id_robot 输入" variant="standard"/>
-                            </Box>
-                            <Button sx={{ml: 2}} disabled variant="contained">查询</Button>
+
+                            {/*id_robot搜索*/}
+                            {/*<Box sx={{ml: 2, display: 'flex', alignItems: 'flex-end'}}>*/}
+                            {/*<SmartToy sx={{color: 'action.active', mr: 1, my: 0.5}}/>*/}
+                            {/*<TextField id="input-with-sx" label="id_robot 输入" variant="standard"/>*/}
+                            {/*</Box>*/}
+
+                            <Button sx={{ml: 2}} onClick={searchSensorByDate} variant="contained">查询</Button>
+                            <IconButton aria-label="Refresh" size="large" onClick={() => {
+                                getMyRobotSensor(JSON.parse(sessionStorage.getItem('loginAccount')).IDAccount);
+                            }}>
+                                <Refresh/>
+                            </IconButton>
                         </Box>
                         <Table
                             sx={{minWidth: 750}}
@@ -374,7 +446,7 @@ export default function Mysensor({}) {
                                 onRequestSort={handleRequestSort}
                                 rowCount={rows.length}
                             />
-                            {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
+                            {rows.length === 0 && searching ? <CircularProgress sx={{ml: 2}} size={20}/> : (
                                 <TableBody>
                                     {visibleRows.map((row, index) => {
                                         const isItemSelected = isSelected(row.id);
@@ -446,6 +518,7 @@ export default function Mysensor({}) {
                     />
                 </Paper>
                 <FormControlLabel
+                    sx={{ml: 1}}
                     control={<Switch checked={dense} onChange={handleChangeDense}/>}
                     label="紧凑视图"
                 />
