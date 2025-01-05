@@ -1,4 +1,9 @@
-### net/http包 实现页面请求响应 + sqlc 实现数据库操纵 + Swagger 自动文档
+### gin框架 实现页面请求响应 + sqlc、database包和sqlx库 实现数据库操纵 + Swagger 自动文档
+
+1、填写配置文件: common/config.go 
+
+2、启动:
+> go run main.go
 
 - net/http包 用法 位于 [_netstart文件夹](https://github.com/foreverlz1111/commonplace/tree/main/robot-webui/api/_netstart)
 
