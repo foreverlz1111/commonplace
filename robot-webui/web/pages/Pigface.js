@@ -28,9 +28,9 @@ function createData(id, id_pig, collection_datetime, id_robot, rgb, thermal, pig
     };
 }
 
-const fetchImageUrl = async (filename) => {
+export const fetchImageUrl = async (filename) => {
     try {
-        const response = await fetch(`/api/getossurl?filename=${filename}`,{
+        const response = await fetch(`/api/getossurl?filename=${filename}`, {
             method: 'GET',
             headers: {
                 contentType: "application/json",
@@ -319,7 +319,10 @@ export default function Pigface() {
                         </TableHead>
                         {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
                             <TableBody>
-                                {visibleRows.map((row) => (<Row key={row.id} row={row}/>))}
+                                {visibleRows.map((row) => (
+                                        <Row key={row.id} row={row}/>
+                                    )
+                                )}
                             </TableBody>
                         )}
                     </Table>
@@ -334,7 +337,6 @@ export default function Pigface() {
                         rowsPerPageOptions={[5, 10, 25]} // 可选的每页行数
                     />
                 </TableContainer>
-
             </Paper>
         </Box>
     );
