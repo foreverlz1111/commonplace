@@ -8,7 +8,8 @@ INSERT INTO robot_sensor(id_robot, collection_datetime, collection_sf6, collecti
 -- name: RobotSensorSearchByAccount :many
 SELECT *
 FROM robot_sensor
-WHERE id_robot IN (?);
+WHERE id_robot IN (?)
+order by collection_datetime desc;
 
 -- name: RobotSensorSearchByAccountScreen :many
 SELECT *

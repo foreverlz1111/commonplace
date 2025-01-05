@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
@@ -381,10 +382,10 @@ func myRobotSensor(w http.ResponseWriter, r *http.Request, ctx context.Context, 
 	if err != nil {
 		log.Println(err)
 	} else {
-		log.Println("result", result, " Search")
+		log.Println("result", result, " Searched")
 	}
 
-	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_sensor WHERE id_robot IN (?);", result)
+	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_sensor WHERE id_robot IN (?) ORDER BY `collection_datetime` DESC;", result)
 	if err != nil {
 		log.Println("sqlxquery", err)
 	}
@@ -394,7 +395,68 @@ func myRobotSensor(w http.ResponseWriter, r *http.Request, ctx context.Context, 
 	if err != nil {
 		log.Println("SelectContext", err)
 	} else {
-		log.Println("myRobotSensor")
+		log.Println("myRobotSensor()")
+		json.NewEncoder(w).Encode(robotSensor)
+	}
+}
+
+func myRobotSensorByDate(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries, sqlxdb *sqlx.DB) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+	valueIdAccount := urlquery.Get("id_account")
+	if valueIdAccount == "" {
+		log.Println("Key not found: 'id_account'")
+	}
+	begindatevalue := urlquery.Get("begin_date")
+	var begindate time.Time
+	if begindatevalue == "" {
+		log.Println("Key not found: 'begin_date'")
+	} else {
+		// 将begin_date转换为time.Time
+		var err error
+		begindate, err = time.Parse("2006-01-02", begindatevalue)
+		if err != nil {
+			log.Println("Error parsing begin_date:", err)
+		} else {
+			fmt.Println("Begin date:", begindate)
+		}
+	}
+	enddatevalue := urlquery.Get("end_date")
+	var enddate time.Time
+	if enddatevalue == "" {
+		log.Println("Key not found: 'end_date'")
+	} else {
+		// 将end_date转换为time.Time
+		var err error
+		enddate, err = time.Parse("2006-01-02", enddatevalue)
+		if err != nil {
+			log.Println("Error parsing end_date:", err)
+		} else {
+			fmt.Println("End date:", enddate)
+		}
+	}
+	result, err := query.RobotIDSearchByAccount(ctx, valueIdAccount)
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("result:", result, " Searched")
+	}
+	beginDateFormatted := begindate.Format("2006-01-02 15:04:05")
+	endDateFormatted := enddate.Format("2006-01-02 15:04:05")
+	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_sensor WHERE id_robot IN (?) AND collection_datetime BETWEEN (?) AND (?) ORDER BY `collection_datetime` DESC;", result, beginDateFormatted, endDateFormatted)
+	if err != nil {
+		log.Println("sqlxquery", err)
+	}
+
+	sqlxquery = sqlxdb.Rebind(sqlxquery)
+	var robotSensor []RobotSensor
+	err = sqlxdb.SelectContext(context.Background(), &robotSensor, sqlxquery, args...)
+	if err != nil {
+		log.Println("SelectContext", err)
+	} else {
+		log.Println("myRobotSensorByDate()")
 		json.NewEncoder(w).Encode(robotSensor)
 	}
 }
@@ -457,6 +519,30 @@ func pigFaceAll(w http.ResponseWriter, r *http.Request, ctx context.Context, que
 		log.Println("SelectContext", err)
 	} else {
 		//log.Println("pigcurrent ", pigcurrent[:3])
+		json.NewEncoder(w).Encode(pigcurrent)
+	}
+}
+func pigFaceOne(w http.ResponseWriter, r *http.Request, ctx context.Context, query *dboutput.Queries, sqlxdb *sqlx.DB) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET method is allowed", http.StatusMethodNotAllowed)
+	}
+	urlquery := r.URL.Query()
+
+	valueIdRobot := urlquery.Get("id_robot")
+	if valueIdRobot == "" {
+		log.Println("Key not found: 'id_robot'")
+	}
+
+	sqlxquery, args, err := sqlx.In("SELECT * FROM pig_current WHERE id_robot = (?) ORDER BY `collection_datetime` DESC LIMIT 1;", valueIdRobot)
+	if err != nil {
+		log.Println("sqlx query:", err)
+	}
+	sqlxquery = sqlxdb.Rebind(sqlxquery)
+	var pigcurrent []PigCurrent
+	err = sqlxdb.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
+	if err != nil {
+		log.Println("SelectContext", err)
+	} else {
 		json.NewEncoder(w).Encode(pigcurrent)
 	}
 }
@@ -533,6 +619,9 @@ func main() {
 	http.HandleFunc("/myrobotsensor", func(w http.ResponseWriter, r *http.Request) {
 		myRobotSensor(w, r, ctx, query, sqlxdb)
 	})
+	http.HandleFunc("/myrobotsensorbydate", func(w http.ResponseWriter, r *http.Request) {
+		myRobotSensorByDate(w, r, ctx, query, sqlxdb)
+	})
 	http.HandleFunc("/myrobotsensorscreen", func(w http.ResponseWriter, r *http.Request) {
 		myrobotSensorScreen(w, r, ctx, query)
 	})
@@ -541,6 +630,9 @@ func main() {
 	}))
 	http.HandleFunc("/pigfaceall", func(w http.ResponseWriter, r *http.Request) {
 		pigFaceAll(w, r, ctx, query, sqlxdb)
+	})
+	http.HandleFunc("/pigfaceone", func(w http.ResponseWriter, r *http.Request) {
+		pigFaceOne(w, r, ctx, query, sqlxdb)
 	})
 	http.HandleFunc("/doc/", httpSwagger.WrapHandler)
 	http.HandleFunc("/getossurl", jwtMiddleware(func(w http.ResponseWriter, r *http.Request) {
