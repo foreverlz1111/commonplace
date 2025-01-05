@@ -20,9 +20,10 @@ import {wait} from "next/dist/lib/wait";
 
 
 function Copyright(props) {
-    return (<Typography variant="body2" color="text.secondary" align="center" {...props}>
+    return (
+        <Grid variant="body2" color="text.secondary" align="center" {...props}>
         <GitHub sx={{verticalAlign: 'middle'}}/>{' '}
-        <Grid
+        <Typography
             sx={{
                 display: 'inline-block',
                 position: 'relative',
@@ -33,9 +34,8 @@ function Copyright(props) {
             </Link>
             {' - '}
             {new Date().getFullYear()}
-
-        </Grid>
-    </Typography>);
+        </Typography>
+    </Grid>);
 }
 
 const defaultTheme = createTheme();
