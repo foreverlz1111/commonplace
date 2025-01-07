@@ -1,6 +1,6 @@
 
 
-![](./static/images/page_myrobot.png)
+![](public/images/page_myrobot.png)
 
 #### 基于模板 [material-ui-nextjs-pages-router](https://github.com/mui/material-ui/tree/master/examples/material-ui-nextjs) :
 > 使用 Material UI 5.16.7

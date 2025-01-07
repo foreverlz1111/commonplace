@@ -4,8 +4,13 @@ module.exports = {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8080/:path*', // 代理到后端服务器
+        destination: 'http://localhost:3000/:path*', // 代理到后端服务器
       },
     ];
   },
 };
+
+// module.exports = {
+  // output:"export",
+  // distDir: 'build',
+// }

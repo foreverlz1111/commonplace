@@ -346,7 +346,7 @@ export default function Myrobot() {
             {/*        open={AddButtonStatus}*/}
             {/*        onClose={handleAddButtonStatusClose}*/}
             {/*        PaperProps={{*/}
-            {/*            component: 'form', onSubmit: (event) => {*/}
+            {/*            components: 'form', onSubmit: (event) => {*/}
             {/*                event.preventDefault();*/}
             {/*                const formData = new FormData(event.currentTarget);*/}
             {/*                const formJson = Object.fromEntries(formData.entries());*/}

@@ -189,7 +189,7 @@ export default function StatusRobot() {
             >
                 <Box
                     component="img"
-                    src="static/images/robot.png" // 替换为实际图片链接
+                    src="images/robot.png" // 替换为实际图片链接
                     alt="机器人图片"
                     sx={{
                         mb: 2, maxWidth: '100%',      // 限制图片最大宽度为容器宽度

@@ -13,7 +13,7 @@ import Badge from '@mui/material/Badge';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import {forthListItems, mainListItems, secondaryListItems, thirdListItems} from './listItems';
+import {forthListItems, mainListItems, secondaryListItems, thirdListItems} from '../components/listItems';
 
 import ViewCarousel from "@mui/icons-material/ViewCarousel";
 import Avatar from "@mui/material/Avatar";

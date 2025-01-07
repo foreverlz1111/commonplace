@@ -503,7 +503,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={rgburl ? rgburl : "/static/images/rgb.jpg"}
+                                    src={rgburl ? rgburl : "images/rgb.jpg"}
                                     alt="image-1"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
@@ -519,7 +519,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={thermalurl ? thermalurl : "/static/images/thermal.jpg"}
+                                    src={thermalurl ? thermalurl : "images/thermal.jpg"}
                                     alt="image-2"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
@@ -535,7 +535,7 @@ export default function Screen() {
                         <Grid item xs={4} display="flex" justifyContent="center">
                             <Box sx={{textAlign: 'center'}}>
                                 <img
-                                    src={cameraurl ? cameraurl : "/static/images/rgbd.jpg"}
+                                    src={cameraurl ? cameraurl : "images/rgbd.jpg"}
                                     alt="image-3"
                                     style={{
                                         maxWidth: '100%',   // 最大宽度不超过父容器
