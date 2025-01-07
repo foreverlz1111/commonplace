@@ -18,7 +18,7 @@ func main() {
 	myoss.Init()
 	r := gin.Default()
 	route.InitRouter(r)
-	gin_err := r.Run(":8080")
+	gin_err := r.Run(":3000")
 	common.MyLogger.Error(gin_err)
 
 	//http.HandleFunc("/doc/", httpSwagger.WrapHandler)
