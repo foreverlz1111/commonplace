@@ -1,6 +1,6 @@
 ### 数据库表
 
-* 表 ROBOT_CURRENT
+* 表 ROBOT_STATUS
 
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
@@ -10,24 +10,6 @@
 |connection_success_info | 返回的是“成功”或“失败”的布尔类型。(成功和失败的存入为1和0)|**TINYINT** <br> null|
 |connection_code |连接代码|**VARCHAR(5)**<br> null|
 |connection_msg | 正常消息：成功。如果connection_success_info是false，这里填连接失败。以下列的内容全部留空直接写入|**VARCHAR(20)** <br> null|
-|version_navisboard |NavisBoard版本 |**VARCHAR(50)** <br> null |
-|version_navisbrain |NavisBrain版本 |**VARCHAR(50)** <br> null|
-|version_navisbridge |NavisBridge版本 |**VARCHAR(50)** <br> null|
-|version_platform_type |移动平台类型 |**VARCHAR(50)** <br> null|
-|version_platform_software |移动平台版本 |**VARCHAR(50)** <br> null|
-|version_platform_hardware |移动平台硬件 |**VARCHAR(50)** <br> null|
-|version_lidar_type |激光雷达传感器类型 |**VARCHAR(50)** <br> null|
-|version_lidar_software |激光雷达传感器版本 |**VARCHAR(50)** <br> null|
-|version_lidar_hardware |激光雷达传感器硬件 |**VARCHAR(50)** <br> null|
-|version_inertia_type |惯性传感器型号 |**VARCHAR(50)** <br> null|
-|version_inertia_software |惯性传感器版本 |**VARCHAR(50)** <br> null|
-|version_inertia_hardware |惯性传感器硬件 |**VARCHAR(50)** <br> null|
-|version_vision_type |视觉传感器型号 |**VARCHAR(50)** <br> null|
-|version_vision_software |视觉传感器版本 |**VARCHAR(50)** <br> null|
-|version_vision_hardware |视觉传感器硬件 |**VARCHAR(50)** <br> null|
-|version_compute_type |核心计算单元型号 |**VARCHAR(50)** <br> null|
-|version_compute_software |核心计算单元版本 |**VARCHAR(50)** <br> null|
-|version_compute_hardware |核心计算单元硬件 |**VARCHAR(50)** <br> null|
 |status_navigating |导航状态 |**VARCHAR(10)** <br> null|
 |status_navigatingmap |导航的地图信息 |**VARCHAR(100)** <br> null|
 |status_navigatingtask |导航的任务信息 |**VARCHAR(100)** <br> null|
@@ -54,6 +36,31 @@
 |status_sensor_isopen |设备传感器状态 |**TINYINT** <br> null|
 |status_disk_space |机器人底盘的磁盘空间 |**VARCHAR(20)** <br> null|
 
+* 表 ROBOT_VERSION
+
+| 字段 | 备注 | 数据类型 |
+| :----- | :----- | :----- |
+|id | |**INT** <br> not null <br> PRIMARY| 
+|id_robot | 机器人标识，对应ROBOT_INFO的id_robot|**VARCHAR(20)** <br> not null|
+|collection_datetime | 数据库里传一个NOW()进去 |**DATETIME** <br> not null|
+|version_navisboard |NavisBoard版本 |**VARCHAR(50)** <br> null |
+|version_navisbrain |NavisBrain版本 |**VARCHAR(50)** <br> null|
+|version_navisbridge |NavisBridge版本 |**VARCHAR(50)** <br> null|
+|version_platform_type |移动平台类型 |**VARCHAR(50)** <br> null|
+|version_platform_software |移动平台版本 |**VARCHAR(50)** <br> null|
+|version_platform_hardware |移动平台硬件 |**VARCHAR(50)** <br> null|
+|version_lidar_type |激光雷达传感器类型 |**VARCHAR(50)** <br> null|
+|version_lidar_software |激光雷达传感器版本 |**VARCHAR(50)** <br> null|
+|version_lidar_hardware |激光雷达传感器硬件 |**VARCHAR(50)** <br> null|
+|version_inertia_type |惯性传感器型号 |**VARCHAR(50)** <br> null|
+|version_inertia_software |惯性传感器版本 |**VARCHAR(50)** <br> null|
+|version_inertia_hardware |惯性传感器硬件 |**VARCHAR(50)** <br> null|
+|version_vision_type |视觉传感器型号 |**VARCHAR(50)** <br> null|
+|version_vision_software |视觉传感器版本 |**VARCHAR(50)** <br> null|
+|version_vision_hardware |视觉传感器硬件 |**VARCHAR(50)** <br> null|
+|version_compute_type |核心计算单元型号 |**VARCHAR(50)** <br> null|
+|version_compute_software |核心计算单元版本 |**VARCHAR(50)** <br> null|
+|version_compute_hardware |核心计算单元硬件 |**VARCHAR(50)** <br> null|
 * 表 ROBOT_SENSOR
 
 | 字段 | 备注 | 数据类型 |
@@ -87,6 +94,7 @@
 |collection_temperature |生猪的面部温度，取最高值 |**FLOAT** <br> null | 
 |collection_img_rgbd |文件路径 拍摄的生猪的深度图像 |**VARCHAR(200)** <br> null | 
 |collection_img_camera |文件路径 拍摄的相机实时画面 |**VARCHAR(200)** <br> null | 
+
 * 表 ROBOT_INFO
 
 | 字段 | 备注 | 数据类型 |
@@ -109,7 +117,7 @@
 | 字段 | 备注 | 数据类型 |
 | :----- | :----- | :----- |
 |id_account |登录名。无限制，中英文数字 |**VARCHAR(50)** <br>not null <br> primary | 
-|pwd_account |登录密码。英文数字 |**VARCHAR(50)** <br>not null| 
+|pwd_account |登录密码。英文数字 |**VARCHAR(200)** <br>not null| 
 |type_account |用户类型，0管理员，1用户，2访客 |**VARCHAR(2)** <br>not null| 
 |available_satus_account |是否可用。1可用，0停用。默认1|**TINYINT** <br>null|
 |dept_account |来自部门 |**VARCHAR(50)** <br> null| 

@@ -18,5 +18,6 @@ create table robot_sensor
     collection_depth       varchar(200) null comment '文件路径 相机depth图像数据',
     constraint robot_sensor_robot_info_id_robot_fk
         foreign key (id_robot) references robot_info (id_robot)
-);
+)
+    charset = utf8mb3;
 
