@@ -22,12 +22,6 @@ import {useEffect, useState} from "react";
 import TablePagination from "@mui/material/TablePagination";
 
 
-function createData(id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd, camera) {
-    return {
-        id, id_pig, collection_datetime, id_robot, rgb, thermal, pigtemp, rgbd, camera
-    };
-}
-
 export const fetchImageUrl = async (filename) => {
     try {
         const response = await fetch(`/api/getossurl?filename=${filename}`, {
@@ -40,6 +34,7 @@ export const fetchImageUrl = async (filename) => {
 
         if (response.ok) {
             const data = await response.json();
+            console.log("get ossurl",data.ossurl)
             return data.ossurl;
         } else {
             console.error("Failed to fetch image URL");
@@ -57,56 +52,56 @@ function Row(props) {
     const [rgburl, setRGBUrl] = useState("");
     const [thermalurl, setThermalUrl] = useState("");
     const [cameraurl, setCameraUrl] = useState("");
-    // console.log(row)
+
     useEffect(() => {
-        if (open && row.rgb) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+        if (open && row.CollectionImgRgb.String) {  // 仅在打开并且 `row.rgb` 存在时加载图片
             const loadImage = async () => {
-                const url = await fetchImageUrl(row.rgb);
+                const url = await fetchImageUrl(row.CollectionImgRgb.String);
                 setRGBUrl(url);
             };
             loadImage();
         } else {
             setRGBUrl("");  // 如果折叠关闭，则清空图片 URL
         }
-    }, [open, row.rgb]);
+    }, [open, row.CollectionImgRgb.String]);
 
     useEffect(() => {
-        if (open && row.thermal) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+        if (open && row.CollectionImgThermal.String) {  // 仅在打开并且 `row.rgb` 存在时加载图片
             const loadImage = async () => {
-                const url = await fetchImageUrl(row.thermal);
+                const url = await fetchImageUrl(row.CollectionImgThermal.String);
                 setThermalUrl(url);
             };
             loadImage();
         } else {
             setThermalUrl("");  // 如果折叠关闭，则清空图片 URL
         }
-    }, [open, row.thermal]);
+    }, [open, row.CollectionImgThermal.String]);
 
     useEffect(() => {
-        if (open && row.rgb) {  // 仅在打开并且 `row.rgb` 存在时加载图片
+        if (open && row.CollectionImgCamera.String) {  // 仅在打开并且 `row.rgb` 存在时加载图片
             const loadImage = async () => {
-                const url = await fetchImageUrl(row.camera);
+                const url = await fetchImageUrl(row.CollectionImgCamera.String);
                 setCameraUrl(url);
             };
             loadImage();
         } else {
             setCameraUrl("");  // 如果折叠关闭，则清空图片 URL
         }
-    }, [open, row.camera]);
+    }, [open, row.CollectionImgCamera.String]);
 
     return (<React.Fragment>
         <TableRow sx={{'& > *': {borderBottom: 'unset'}}}>
-            <TableCell align="left">{row.id_pig}</TableCell>
-            <TableCell align="left">{row.collection_datetime}</TableCell>
-            <TableCell align="left">{row.id_robot}</TableCell>
-            <TableCell sx={{color: row.rgb === "" ? "red" : ""}}
-                       align="left">{row.rgb === "" ? "无" : "是"}</TableCell>
-            <TableCell sx={{color: row.thermal === "" ? "red" : ""}}
-                       align="left">{row.thermal === "" ? "无" : "是"}</TableCell>
-            <TableCell sx={{color: row.pigtemp >= 40 ? "red" : ""}}
-                       align="left">{row.pigtemp === "" ? "无" : row.pigtemp}</TableCell>
-            <TableCell sx={{color: row.rgbd === "" ? "red" : ""}}
-                       align="left">{row.rgbd === "" ? "无" : "是"}</TableCell>
+            <TableCell align="left">{row.IDPig}</TableCell>
+            <TableCell align="left">{row.CollectionDatetime}</TableCell>
+            <TableCell align="left">{row.IDRobot}</TableCell>
+            <TableCell sx={{color: row.CollectionImgRgb.String === "" ? "red" : ""}}
+                       align="left">{row.CollectionImgRgb.String === "" ? "无" : "是"}</TableCell>
+            <TableCell sx={{color: row.CollectionImgThermal.String === "" ? "red" : ""}}
+                       align="left">{row.CollectionImgThermal.String === "" ? "无" : "是"}</TableCell>
+            <TableCell sx={{color: row.CollectionTemperature.Float64 >= 40 ? "red" : ""}}
+                       align="left">{row.CollectionTemperature.Float64 === "" ? "无" : row.CollectionTemperature.Float64}</TableCell>
+            <TableCell sx={{color: row.CollectionImgRgbd.String === "" ? "red" : ""}}
+                       align="left">{row.CollectionImgRgbd.String === "" ? "无" : "是"}</TableCell>
             <TableCell align="center">
                 <IconButton
                     aria-label="expand row"
@@ -252,22 +247,8 @@ export default function Pigface() {
             });
             if (response.status === 200) {
                 const data = await response.json();
-                const processedRows = data.map(item => {
-                    const processedData = extractValidData(item);
 
-                    return createData(
-                        processedData.id,
-                        processedData.id_pig,
-                        processedData.collection_datetime,
-                        processedData.id_robot,
-                        processedData.rgb,
-                        processedData.thermal,
-                        processedData.pigtemp,
-                        processedData.rgbd,
-                        processedData.camera
-                    );
-                });
-                setRows(processedRows);
+                setRows(data);
             }
         } catch (error) {
             console.log(error);
@@ -320,7 +301,7 @@ export default function Pigface() {
                         {rows.length === 0 ? <CircularProgress sx={{ml: 2}} size={20}/> : (
                             <TableBody>
                                 {visibleRows.map((row) => (
-                                        <Row key={row.id} row={row}/>
+                                        <Row key={row.ID} row={row}/>
                                     )
                                 )}
                             </TableBody>
