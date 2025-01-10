@@ -2,10 +2,10 @@ package main
 
 import (
 	"api/common"
-	"api/controller"
 	_ "api/docs"
 	"api/myoss"
 	"api/route"
+	"api/server"
 	_ "github.com/go-sql-driver/mysql"
 	//"github.com/go-playground/validator/v10" // 检查传回的密码格式
 	"github.com/gin-gonic/gin"
@@ -13,8 +13,8 @@ import (
 
 func main() {
 	common.InitLogger()
-	controller.InitMysql()
-	controller.InitSqlx()
+	server.InitMysql()
+	server.InitSqlx()
 	myoss.Init()
 	r := gin.Default()
 	route.InitRouter(r)

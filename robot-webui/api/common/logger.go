@@ -20,5 +20,5 @@ func InitLogger() {
 	})
 
 	//设置日志输出等级
-	MyLogger.SetLevel(logrus.InfoLevel)
+	MyLogger.SetLevel(logrus.DebugLevel)
 }

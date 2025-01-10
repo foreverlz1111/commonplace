@@ -4,6 +4,7 @@ import (
 	"api/common"
 	"api/model"
 	"api/myoss"
+	"api/server"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -11,33 +12,34 @@ import (
 	"time"
 )
 
-// @Summary 根据机器人id获取一个机器人current
+// @Summary 根据机器人id获取一个机器人current,包含状态+版本
 func RobotCurrentTable(c *gin.Context) {
-	//body, err := io.ReadAll(r.Body)
-	//if err != nil {
-	//	http.Error(w, "Failed to read request body", http.StatusBadRequest)
-	//	return
-	//}
-	//var webJson map[string]string
-	//err = json.Unmarshal(body, &webJson)
-	//if err != nil {
-	//	http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-	//	return
-	//}
-	//valueIdRobot, _ := webJson["id_robot"]
-
 	valueIdRobot := c.Query("id_robot")
 	if valueIdRobot == "" {
 		common.MyLogger.Error("Key not found: 'id_robot'")
 	}
-	result, err := MysqlDB.RobotCurrentSearchByNew(context.Background(), valueIdRobot)
+	robotstatus, err := server.MysqlDB.RobotCurrentSearchByNew(context.Background(), valueIdRobot)
 	if err != nil {
 		common.MyLogger.Errorf("RobotCurrentSearchByNew error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	} else {
-		common.MyLogger.Errorf("id_robot: %v", valueIdRobot)
-		c.JSON(http.StatusOK, result)
+		common.MyLogger.Debugf("robotstatus: %v", robotstatus)
 	}
+	robotversion, err := server.MysqlDB.RobotVersionSearchByNew(context.Background(), valueIdRobot)
+	if err != nil {
+		common.MyLogger.Errorf("RobotVersionSearchByNew error: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	} else {
+		common.MyLogger.Debugf("robotversion: %v", robotversion)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"robotstatus":  robotstatus,
+		"robotversion": robotversion,
+	},
+	)
 }
 
 // @Summary 根据机器人id获取机器人的详情
@@ -46,7 +48,7 @@ func RobotInfo(c *gin.Context) {
 	if valueIdRobot == "" {
 		common.MyLogger.Errorf("Key not found: 'id_robot':%v", valueIdRobot)
 	}
-	result, err := MysqlDB.RobotInfoSearchByID(context.Background(), valueIdRobot)
+	result, err := server.MysqlDB.RobotInfoSearchByID(context.Background(), valueIdRobot)
 	if err != nil {
 		common.MyLogger.Errorf("controller.MysqlDB.RobotInfoSearchByID error: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -62,7 +64,7 @@ func MyRobot(c *gin.Context) {
 	if valueIdAccount == "" {
 		common.MyLogger.Errorf("Key not found: 'id_account'")
 	}
-	result, err := MysqlDB.RobotInfoSearchByID2(context.Background(), valueIdAccount)
+	result, err := server.MysqlDB.RobotInfoSearchByID2(context.Background(), valueIdAccount)
 	if err != nil {
 		common.MyLogger.Errorf("controller.MysqlDB.RobotInfoSearchByID2: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
@@ -78,7 +80,7 @@ func MyRobotSensor(c *gin.Context) {
 	if valueIdAccount == "" {
 		common.MyLogger.Error("Key not found: 'id_account'")
 	}
-	result, err := MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
+	result, err := server.MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
 	if err != nil {
 		common.MyLogger.Errorf("RobotIDSearchByAccount err: %v", err)
 	} else {
@@ -89,9 +91,9 @@ func MyRobotSensor(c *gin.Context) {
 	if err != nil {
 		common.MyLogger.Errorf("sqlxquery: ", err)
 	}
-	sqlxquery = SqlxDB.Rebind(sqlxquery)
+	sqlxquery = server.SqlxDB.Rebind(sqlxquery)
 	var robotSensor []model.RobotSensorStruct
-	err = SqlxDB.SelectContext(context.Background(), &robotSensor, sqlxquery, args...)
+	err = server.SqlxDB.SelectContext(context.Background(), &robotSensor, sqlxquery, args...)
 	if err != nil {
 		common.MyLogger.Errorf("SelectContext: %v", err)
 	} else {
@@ -137,7 +139,7 @@ func MyRobotSensorByDate(c *gin.Context) {
 			common.MyLogger.Debugf("MyRobotSensorByDate() End date: %v", enddate)
 		}
 	}
-	result, err := MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
+	result, err := server.MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
 	if err != nil {
 		common.MyLogger.Errorf("MyRobotSensorByDate(): %v", err)
 		return
@@ -152,9 +154,9 @@ func MyRobotSensorByDate(c *gin.Context) {
 		return
 	}
 
-	sqlxquery = SqlxDB.Rebind(sqlxquery)
+	sqlxquery = server.SqlxDB.Rebind(sqlxquery)
 	var robotSensor []model.RobotSensorStruct
-	err = SqlxDB.SelectContext(context.Background(), &robotSensor, sqlxquery, args...)
+	err = server.SqlxDB.SelectContext(context.Background(), &robotSensor, sqlxquery, args...)
 	if err != nil {
 		common.MyLogger.Errorf("MyRobotSensorByDate(): sqlx error %v", err)
 		return
@@ -165,28 +167,30 @@ func MyRobotSensorByDate(c *gin.Context) {
 }
 
 // @Summary 查找id旗下的全部的机器人的current信息
-func RobotCurrentAll(c *gin.Context) {
+func RobotStatusAll(c *gin.Context) {
 	valueIdAccount := c.Query("id_account")
 	if valueIdAccount == "" {
 		common.MyLogger.Error("Key not found: 'id_account'")
 	}
-	result, err := MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
+	result, err := server.MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
 	if err != nil {
 		common.MyLogger.Errorf("controller.MysqlDB.RobotIDSearchByAccount %v", err)
 	} else {
 		common.MyLogger.Debugf("RobotIDSearchByAccount %v", result)
 	}
-	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_current WHERE id_robot IN (?);", result)
+	sqlxquery, args, err := sqlx.In("SELECT * FROM robot_status WHERE id_robot IN (?) limit 10000;", result)
 	if err != nil {
 		common.MyLogger.Errorf("sqlxquery", err)
 	}
-	sqlxquery = SqlxDB.Rebind(sqlxquery)
-	var robotcurrent []model.RobotCurrentStruct
-	err = SqlxDB.SelectContext(context.Background(), &robotcurrent, sqlxquery, args...)
+	sqlxquery = server.SqlxDB.Rebind(sqlxquery)
+	var robotcurrent []model.RobotStatusStruct
+
+	err = server.SqlxDB.SelectContext(context.Background(), &robotcurrent, sqlxquery, args...)
+
 	if err != nil {
-		common.MyLogger.Errorf("SelectContext", err)
+		common.MyLogger.Errorf("SelectContext err", err)
 	} else {
-		common.MyLogger.Debugf("RobotCurrentAll %v", robotcurrent)
+		common.MyLogger.Debugf("RobotStatusAll %v", robotcurrent)
 		c.JSON(http.StatusOK, robotcurrent)
 	}
 }

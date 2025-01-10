@@ -15,5 +15,6 @@ create table robot_info
     remark_robot          varchar(400) null comment '备注信息',
     constraint robot_info_account_info_id_account_fk
         foreign key (id_account) references account_info (id_account)
-);
+)
+    charset = utf8mb3;
 

@@ -1,4 +1,4 @@
-package controller
+package server
 
 import (
 	"github.com/dgrijalva/jwt-go"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var jwtKey = []byte("your_secret_key")
+var jwtKey = []byte("505")
 
 type Claims struct {
 	Username string `json:"username"`
@@ -44,8 +44,10 @@ func JwtMiddleware() gin.HandlerFunc {
 		tokenStr = strings.TrimPrefix(tokenStr, "")
 		claims, err := ValidateJWT(tokenStr)
 		if err != nil {
-			// 如果 token 无效，重定向到首页
-			c.JSON(http.StatusBadRequest, "token do not match")
+			// 如果 token 无效，报错
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": "token验证失败",
+			})
 			return
 		}
 

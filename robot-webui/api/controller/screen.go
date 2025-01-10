@@ -2,6 +2,7 @@ package controller
 
 import (
 	"api/common"
+	"api/server"
 	"context"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -15,7 +16,7 @@ func MyrobotSensorScreen(c *gin.Context) {
 		common.MyLogger.Error("Key not found: 'id_robot'")
 		return
 	}
-	result, err := MysqlDB.RobotSensorSearchByAccountScreen(context.Background(), valueIdRobot)
+	result, err := server.MysqlDB.RobotSensorSearchByAccountScreen(context.Background(), valueIdRobot)
 	if err != nil {
 		log.Println(err)
 		common.MyLogger.Errorf("controller.MysqlDB.RobotSensorSearchByAccountScreen: %v", err)

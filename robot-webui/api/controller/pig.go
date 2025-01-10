@@ -3,6 +3,7 @@ package controller
 import (
 	"api/common"
 	"api/model"
+	"api/server"
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
@@ -15,7 +16,7 @@ func PigFaceAll(c *gin.Context) {
 	if valueIdAccount == "" {
 		common.MyLogger.Error("Key not found: 'id_account'")
 	}
-	result, err := MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
+	result, err := server.MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
 	if err != nil {
 		common.MyLogger.Error(err)
 	} else {
@@ -25,9 +26,9 @@ func PigFaceAll(c *gin.Context) {
 	if err != nil {
 		common.MyLogger.Errorf("sqlx query: %v", err)
 	}
-	sqlxquery = SqlxDB.Rebind(sqlxquery)
+	sqlxquery = server.SqlxDB.Rebind(sqlxquery)
 	var pigcurrent []model.PigCurrentStruct
-	err = SqlxDB.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
+	err = server.SqlxDB.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
 	if err != nil {
 		common.MyLogger.Errorf("SelectContext: %v", err)
 	} else {
@@ -46,9 +47,9 @@ func PigFaceOne(c *gin.Context) {
 	if err != nil {
 		common.MyLogger.Error("sqlx query:", err)
 	}
-	sqlxquery = SqlxDB.Rebind(sqlxquery)
+	sqlxquery = server.SqlxDB.Rebind(sqlxquery)
 	var pigcurrent []model.PigCurrentStruct
-	err = SqlxDB.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
+	err = server.SqlxDB.SelectContext(context.Background(), &pigcurrent, sqlxquery, args...)
 	if err != nil {
 		common.MyLogger.Error("SelectContext", err)
 	} else {

@@ -2,9 +2,9 @@ _sqlcstart/db_config.go
 _sqlcstart/run
 _sqlcstart/myquery
 localtest
+test
 config/db_config.go
 /myoss
 /run
 /dboutput
-
 /common/config.go
