@@ -20,7 +20,8 @@ export default function StatusRobot() {
 
     const [loginAccount, setLoginAccount] = useState(null);
     const [robotList, setRobotList] = useState([]);
-    const [robotCurrent, setRobotCurrent] = useState();
+    const [robotStatus, setRobotStatus] = useState();
+    const [robotVersion, setRobotVersion] = useState();
     const [robotInfo, setRobotInfo] = useState();
 
     const getRobotInfo = async (id_robot) => {
@@ -59,7 +60,8 @@ export default function StatusRobot() {
             if (response.status === 200) {
                 const data = await response.json();
                 console.log('获取机器人状态成功:', data);
-                setRobotCurrent(data);
+                setRobotStatus(data.robotstatus);
+                setRobotVersion(data.robotversion)
             } else {
                 const errorData = await response.json();
                 console.log('错误:', errorData);
@@ -69,7 +71,7 @@ export default function StatusRobot() {
         }
     }
     const handleGetRobotCurrent = () => {
-        setRobotCurrent();
+        setRobotStatus();
         setRobotInfo()
         setTimeout(() => {
             // 在延迟后执行异步操作
@@ -214,11 +216,11 @@ export default function StatusRobot() {
                     <Typography variant="body2" sx={{m: 1}}>
                         机器人状态：
                     </Typography>
-                    {!robotCurrent ? (
+                    {!robotStatus ? (
                         <CircularProgress size={20} />
                     ) : (
                         <Typography variant="body2" sx={{m: 1}}>
-                            {robotCurrent.StatusNavigatingtask?.String || '(就绪)'}
+                            {robotStatus.StatusNavigatingtask?.String || '(就绪)'}
                         </Typography>
                     )}
                 </Box>
@@ -259,11 +261,11 @@ export default function StatusRobot() {
                                     <Typography align="left">电量：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.StatusBatteryPower?.Int16 || 'N/A'} %
+                                            {robotStatus.StatusBatteryPower?.Int16 || 'N/A'} %
                                         </Typography>
                                     )}
                                 </Grid>
@@ -276,11 +278,11 @@ export default function StatusRobot() {
                                     <Typography align="left">电池温度：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.StatusBatteryTemp?.Float64 || 'N/A'} ℃
+                                            {robotStatus.StatusBatteryTemp?.Float64 || 'N/A'} ℃
                                         </Typography>
                                     )}
                                 </Grid>
@@ -293,11 +295,11 @@ export default function StatusRobot() {
                                     <Typography align="left">电池电流：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.StatusBatteryCur?.Float64 || 'N/A'} A
+                                            {robotStatus.StatusBatteryCur?.Float64 || 'N/A'} A
                                         </Typography>
                                     )}
                                 </Grid>
@@ -309,11 +311,11 @@ export default function StatusRobot() {
                                 <Typography align="left">电池电压：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotStatus ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.StatusBatteryVol?.Float64 || 'N/A'} V
+                                        {robotStatus.StatusBatteryVol?.Float64 || 'N/A'} V
                                     </Typography>
                                 )}
                             </Grid>
@@ -325,11 +327,11 @@ export default function StatusRobot() {
                                 <Typography align="left">充电状态：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotStatus ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.StatusBatteryIscharging?.Int16 === 1 ?("充电中"):("放电中") || 'N/A'}
+                                        {robotStatus.StatusBatteryIscharging?.Int16 === 1 ?("充电中"):("放电中") || 'N/A'}
                                     </Typography>
                                 )}
                             </Grid>
@@ -341,11 +343,11 @@ export default function StatusRobot() {
                                 <Typography align="left">充电次数：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotStatus ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.StatusBatteryChargetime?.Int32 || 'N/A'}
+                                        {robotStatus.StatusBatteryChargetime?.Int32 || 'N/A'}
                                     </Typography>
                                 )}
                             </Grid>
@@ -359,11 +361,11 @@ export default function StatusRobot() {
                                     <Typography align="left">电池健康：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.StatusBatteryHealth?.Int16 || 'N/A'} %
+                                            {robotStatus.StatusBatteryHealth?.Int16 || 'N/A'} %
                                         </Typography>
                                     )}
                                 </Grid>
@@ -376,11 +378,11 @@ export default function StatusRobot() {
                                     <Typography align="left">累计充电小时：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.StatusBatteryChargehour?.Float64 || 'N/A'}
+                                            {robotStatus.StatusBatteryChargehour?.Float64 || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -436,11 +438,11 @@ export default function StatusRobot() {
                         <ListItem>
                             <Grid container alignItems="center">
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotStatus ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent?.CollectionDatetime || 'N/A'}
+                                            {robotStatus?.CollectionDatetime || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -477,11 +479,11 @@ export default function StatusRobot() {
                                     <Typography align="left">NavisBoard：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionNavisboard?.String || 'N/A'}
+                                            {robotVersion.VersionNavisboard?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -494,11 +496,11 @@ export default function StatusRobot() {
                                     <Typography align="left">NavisBrain：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionNavisbrain?.String || 'N/A'}
+                                            {robotVersion.VersionNavisbrain?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -511,11 +513,11 @@ export default function StatusRobot() {
                                     <Typography align="left">NavisBridge：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionNavisbridge?.String || 'N/A'}
+                                            {robotVersion.VersionNavisbridge?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -527,11 +529,11 @@ export default function StatusRobot() {
                                 <Typography align="left">移动平台软件：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotVersion ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.VersionPlatformSoftware?.String || 'N/A'}
+                                        {robotVersion.VersionPlatformSoftware?.String || 'N/A'}
                                     </Typography>
                                 )}
                             </Grid>
@@ -543,11 +545,11 @@ export default function StatusRobot() {
                                 <Typography align="left">移动平台硬件：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotVersion ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.VersionPlatformHardware?.String || 'N/A'}
+                                        {robotVersion.VersionPlatformHardware?.String || 'N/A'}
                                     </Typography>
                                 )}
                             </Grid>
@@ -559,11 +561,11 @@ export default function StatusRobot() {
                                 <Typography align="left">激光雷达软件：</Typography>
                             </Grid>
                             <Grid item>
-                                {!robotCurrent ? (
+                                {!robotVersion ? (
                                     <CircularProgress size={20} />
                                 ) : (
                                     <Typography align="left">
-                                        {robotCurrent.VersionLidarSoftware?.String || 'N/A'}
+                                        {robotVersion.VersionLidarSoftware?.String || 'N/A'}
                                     </Typography>
                                 )}
                             </Grid>
@@ -577,11 +579,11 @@ export default function StatusRobot() {
                                     <Typography align="left">激光雷达硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionLidarHardware?.String || 'N/A'}
+                                            {robotVersion.VersionLidarHardware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -594,11 +596,11 @@ export default function StatusRobot() {
                                     <Typography align="left">激光雷达软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionLidarHardware?.String || 'N/A'}
+                                            {robotVersion.VersionLidarHardware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -611,11 +613,11 @@ export default function StatusRobot() {
                                     <Typography align="left">惯性传感器软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionInertiaSoftware?.String || 'N/A'}
+                                            {robotVersion.VersionInertiaSoftware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -628,11 +630,11 @@ export default function StatusRobot() {
                                     <Typography align="left">惯性传感器硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionInertiaHardware?.String || 'N/A'}
+                                            {robotVersion.VersionInertiaHardware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -645,11 +647,11 @@ export default function StatusRobot() {
                                     <Typography align="left">视觉传感器软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionVisionSoftware?.String || 'N/A'}
+                                            {robotVersion.VersionVisionSoftware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -662,11 +664,11 @@ export default function StatusRobot() {
                                     <Typography align="left">视觉传感器硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionVisionHardware?.String || 'N/A'}
+                                            {robotVersion.VersionVisionHardware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -679,11 +681,11 @@ export default function StatusRobot() {
                                     <Typography align="left">核心计算单元软件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionComputeSoftware?.String || 'N/A'}
+                                            {robotVersion.VersionComputeSoftware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
@@ -696,11 +698,11 @@ export default function StatusRobot() {
                                     <Typography align="left">核心计算单元硬件：</Typography>
                                 </Grid>
                                 <Grid item>
-                                    {!robotCurrent ? (
+                                    {!robotVersion ? (
                                         <CircularProgress size={20} />
                                     ) : (
                                         <Typography align="left">
-                                            {robotCurrent.VersionComputeHardware?.String || 'N/A'}
+                                            {robotVersion.VersionComputeHardware?.String || 'N/A'}
                                         </Typography>
                                     )}
                                 </Grid>
