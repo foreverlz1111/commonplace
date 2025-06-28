@@ -572,9 +572,9 @@ export default function Screen() {
                         }}>
                             <IconButton sx={{color: "white"}} aria-label="Example" disableRipple>
                                 <SavingsIcon/>
-                                <Typography variant={"h6"}>生猪id</Typography>
+                                <Typography variant={"h6"}>生猪编号：</Typography>
                             </IconButton>
-                            <Typography variant={"h6"}>{latestpig?.ID || 'N/A'}</Typography>
+                            <Typography variant={"h6"}>{latestpig?.IDPig || 'N/A'}</Typography>
                         </Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
@@ -589,9 +589,9 @@ export default function Screen() {
                             color: "#ffffff",
                         }}><IconButton sx={{color: "white"}} aria-label="Example" disableRipple>
                             <ThermostatIcon/>
-                            <Typography variant={"h6"}>生猪体温 (℃)</Typography>
+                            <Typography variant={"h6"}>生猪体温 </Typography>
                         </IconButton>
-                            <Typography variant={"h6"}>{latestpig.CollectionTemperature?.Float64 || 'N/A'}</Typography></Grid>
+                            <Typography variant={"h6"}>{latestpig.CollectionTemperature?.Float64+"℃" || 'N/A'}</Typography></Grid>
                         <Grid xs={12} sx={{
                             height: "5vh",
                             width: "80%",
