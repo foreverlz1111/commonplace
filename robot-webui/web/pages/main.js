@@ -88,7 +88,7 @@ export default function Main() {
             if (storedAccount) {
                 setLoginAccount(storedAccount); // 如果有数据，则更新状态
                 setWelcome(
-                    storedAccount.IDAccount+" - "+storedAccount.DeptAccount.String
+                    storedAccount.IDAccount + " - " + storedAccount.DeptAccount.String
                 )
                 // console.log('Stored account:', storedAccount); // 打印的是正确的存储的值
             } else {
@@ -111,7 +111,7 @@ export default function Main() {
     };
 
 
-    const exitButton = () =>{
+    const exitButton = () => {
         // 清空 sessionStorage 和 localStorage
         sessionStorage.clear();
         // 重定向到首页
@@ -147,7 +147,7 @@ export default function Main() {
                             noWrap
                             sx={{flexGrow: 1}}
                         >
-                            {selectedPage}
+                            <strong>生猪智能识别系统 - </strong> {selectedPage}
                         </Typography>
                         <IconButton href={"https://github.com/foreverlz1111/commonplace/tree/main/robot-webui"}
                                     color="inherit">
@@ -167,7 +167,8 @@ export default function Main() {
                             </Badge>
                         </IconButton>
                         {welcome}
-                        <Button sx={{m: 1, width: 2, height: 25}} variant="contained" color="secondary" onClick={exitButton}>
+                        <Button sx={{m: 1, width: 2, height: 25}} variant="contained" color="secondary"
+                                onClick={exitButton}>
                             退出
                         </Button>
                     </Toolbar>
@@ -215,7 +216,7 @@ export default function Main() {
                          overflow: 'auto',
                      }}>
                     {selectedPage === '机器人状态' && (
-                        <StatusRobot />
+                        <StatusRobot/>
                     )}
                     {selectedPage === "我的机器人" && (
                         <Myrobot/>
@@ -233,7 +234,7 @@ export default function Main() {
                         <Pigface></Pigface>
                     )}
                     {selectedPage === "展示大屏" && (
-                        <Screen ></Screen>
+                        <Screen></Screen>
                     )}
                 </Box>
             </Box>
