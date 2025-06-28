@@ -176,8 +176,8 @@ EnhancedTableToolbar.propTypes = {
 export default function Logrobot({}) {
     const [rows, setRows] = React.useState([]);
 
-    const [order, setOrder] = React.useState('asc');
-    const [orderBy, setOrderBy] = React.useState('id_robot');
+        const [order, setOrder] = React.useState('desc');
+    const [orderBy, setOrderBy] = React.useState('collection_datetime');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
     const [dense, setDense] = React.useState(false);
