@@ -1,9 +1,10 @@
 package controller
 
 import (
-	"api/common"
+	"api/config"
 	"api/dboutput"
 	"api/server"
+	"api/util"
 	"context"
 	"database/sql"
 	"github.com/gin-gonic/gin"
@@ -24,20 +25,20 @@ func RegisterHandler(c *gin.Context) {
 
 	valueIdAccount := data["id_account"]
 	valuePwdAccount := data["pwd_account"]
-	common.MyLogger.Debugf("valueIdAccount: %v", valueIdAccount)
-	common.MyLogger.Debugf("valuePwdAccount: %v", valuePwdAccount)
+	config.MyLogger.Debugf("valueIdAccount: %v", valueIdAccount)
+	config.MyLogger.Debugf("valuePwdAccount: %v", valuePwdAccount)
 
 	userinfo := acountserver.GetUserByID(valueIdAccount)
 
 	if userinfo.IDAccount == "" {
 		if valuePwdAccount == "" {
-			common.MyLogger.Errorf("传入密码为空")
+			config.MyLogger.Errorf("传入密码为空")
 		}
 		pwdaccountstr := string(server.EnCoder(valuePwdAccount))
 		if pwdaccountstr == "" {
-			common.MyLogger.Errorf("生成加密密码失败")
+			config.MyLogger.Errorf("生成加密密码失败")
 		}
-		common.MyLogger.Debugf("pwdaccountstr: %v", pwdaccountstr)
+		config.MyLogger.Debugf("pwdaccountstr: %v", pwdaccountstr)
 		if acountserver.RegisterUser(dboutput.AccountInfo{
 			IDAccount:             valueIdAccount,
 			PwdAccount:            pwdaccountstr,
@@ -69,7 +70,7 @@ func RegisterHandler(c *gin.Context) {
 func LoginHandler(c *gin.Context) {
 	var data map[string]string
 	if err := c.ShouldBindJSON(&data); err != nil {
-		common.MyLogger.Errorf("传入请json数据格式错误")
+		config.MyLogger.Errorf("传入请json数据格式错误")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "请检查json数据格式",
 		})
@@ -80,7 +81,7 @@ func LoginHandler(c *gin.Context) {
 	valuePwdAccount := data["pwd_account"]
 
 	if valueIdAccount == "" || valuePwdAccount == "" {
-		common.MyLogger.Errorf("传入账户或密码为空")
+		config.MyLogger.Errorf("传入账户或密码为空")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "账户或密码为空",
 		})
@@ -94,9 +95,9 @@ func LoginHandler(c *gin.Context) {
 	if userinfo.IDAccount != "" {
 		if server.DeCoder(userinfo.PwdAccount, valuePwdAccount) {
 			// 生成 JWT
-			token, err := server.GenerateJWT(valueIdAccount)
+			token, err := util.GenerateJWT(valueIdAccount)
 			if err != nil {
-				common.MyLogger.Errorf("服务无法生成token %v", err)
+				config.MyLogger.Errorf("服务无法生成token %v", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "服务无法生成token"})
 				return
 			}
@@ -104,7 +105,7 @@ func LoginHandler(c *gin.Context) {
 			// 更新登陆日期
 			err = server.MysqlDB.AccountLoginDateUpdate(context.Background(), valueIdAccount)
 			if err != nil {
-				common.MyLogger.Errorf("更新登陆时间 %v", err)
+				config.MyLogger.Errorf("更新登陆时间 %v", err)
 			}
 
 			// 返回数据给请求方，to-do 处理userinfo信息，隐藏隐私数据
@@ -136,10 +137,10 @@ func AccountRobot(c *gin.Context) {
 	}
 	result, err := server.MysqlDB.RobotIDSearchByAccount(context.Background(), valueIdAccount)
 	if err != nil {
-		common.MyLogger.Errorf("AccountRobot error: %s", err)
+		config.MyLogger.Errorf("AccountRobot error: %s", err)
 		c.JSON(http.StatusBadRequest, c.Error(err))
 	} else {
-		common.MyLogger.Debugf("id_account: %v", valueIdAccount)
+		config.MyLogger.Debugf("id_account: %v", valueIdAccount)
 		c.JSON(http.StatusOK, result)
 	}
 }

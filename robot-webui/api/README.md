@@ -1,4 +1,4 @@
-### gin框架 实现页面请求响应 + sqlc、database包和sqlx库 实现数据库操纵 + Swagger 自动文档
+### gin框架 实现页面请求响应 + sqlc、database包和实现数据库DML + Swagger 自动文档
 0、克隆项目
 
 1、填写配置文件: common/config.go 

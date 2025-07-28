@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"api/common"
+	"api/config"
 	"api/server"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -12,12 +12,12 @@ import (
 func PigFaceAll(c *gin.Context) {
 	valueIdAccount := c.Query("id_account")
 	if valueIdAccount == "" {
-		common.MyLogger.Error("Key not found: 'id_account'")
+		config.MyLogger.Error("Key not found: 'id_account'")
 	}
 
 	result, err := server.MysqlDB.PigfaceAllByAccount(context.Background(), valueIdAccount)
 	if err != nil {
-		common.MyLogger.Error("server.MysqlDB.PigfaceAllByAccount", err)
+		config.MyLogger.Error("server.MysqlDB.PigfaceAllByAccount", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   err,
 			"message": "查找猪脸数据失败",
@@ -32,19 +32,19 @@ func PigFaceAll(c *gin.Context) {
 func PigFaceOne(c *gin.Context) {
 	valueIdRobot := c.Query("id_robot")
 	if valueIdRobot == "" {
-		common.MyLogger.Error("Key not found: 'id_robot'")
+		config.MyLogger.Error("Key not found: 'id_robot'")
 	}
 
 	result, err := server.MysqlDB.PigfaceOneByRobot(context.Background(), valueIdRobot)
 	if err != nil {
-		common.MyLogger.Error("server.MysqlDB.PigfaceOneByRobot", err)
+		config.MyLogger.Error("server.MysqlDB.PigfaceOneByRobot", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   err,
 			"message": "查找猪脸数据失败",
 		})
 		return
 	}
-	common.MyLogger.Debugf("server.MysqlDB.PigfaceOneByRobot result: %v", result)
+	config.MyLogger.Debugf("server.MysqlDB.PigfaceOneByRobot result: %v", result)
 	c.JSON(http.StatusOK, result)
 
 	//sqlxquery, args, err := sqlx.In("SELECT * FROM pig_current WHERE id_robot = (?) ORDER BY `collection_datetime` DESC LIMIT 1;", valueIdRobot)

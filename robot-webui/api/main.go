@@ -1,10 +1,9 @@
 package main
 
 import (
-	"api/common"
+	"api/config"
 	_ "api/docs"
 	"api/myoss"
-	"api/route"
 	"api/server"
 	_ "github.com/go-sql-driver/mysql"
 	//"github.com/go-playground/validator/v10" // 检查传回的密码格式
@@ -12,14 +11,13 @@ import (
 )
 
 func main() {
-	common.InitLogger()
+	config.InitLogger()
 	server.InitMysql()
-	server.InitSqlx()
 	myoss.Init()
 	r := gin.Default()
-	route.InitRouter(r)
-	gin_err := r.Run(":3000")
-	common.MyLogger.Error(gin_err)
+	InitRouter(r)
+	ginErr := r.Run(":3000")
+	config.MyLogger.Error(ginErr)
 
 	//http.HandleFunc("/doc/", httpSwagger.WrapHandler)
 }

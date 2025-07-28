@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"api/common"
+	"api/config"
 	"api/server"
 	"context"
 	"github.com/gin-gonic/gin"
@@ -13,16 +13,16 @@ import (
 func MyrobotSensorScreen(c *gin.Context) {
 	valueIdRobot := c.Query("id_robot")
 	if valueIdRobot == "" {
-		common.MyLogger.Error("Key not found: 'id_robot'")
+		config.MyLogger.Error("Key not found: 'id_robot'")
 		return
 	}
 	result, err := server.MysqlDB.RobotSensorSearchByAccountScreen(context.Background(), valueIdRobot)
 	if err != nil {
 		log.Println(err)
-		common.MyLogger.Errorf("controller.MysqlDB.RobotSensorSearchByAccountScreen: %v", err)
+		config.MyLogger.Errorf("controller.MysqlDB.RobotSensorSearchByAccountScreen: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	} else {
-		common.MyLogger.Debugf("id_robot sensor 6[]: %v", result)
+		config.MyLogger.Debugf("id_robot sensor 6[]: %v", result)
 		c.JSON(http.StatusOK, result)
 	}
 }

@@ -25,3 +25,8 @@ WHERE id_robot = ? order by collection_datetime desc limit 1;
 SELECT *
 FROM  robot_status
 WHERE id_robot IN (?);
+
+-- name: RobotCurrentAll :many
+SELECT *
+FROM robot_status
+WHERE id_robot IN (sqlc.slice("id_robot")) limit 500;

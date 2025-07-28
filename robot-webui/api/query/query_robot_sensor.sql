@@ -8,11 +8,15 @@ INSERT INTO robot_sensor(id_robot, collection_datetime, collection_sf6, collecti
 -- name: RobotSensorSearchByAccount :many
 SELECT *
 FROM robot_sensor
-WHERE id_robot IN (?)
+WHERE id_robot IN (sqlc.slice("id_robot"))
 order by collection_datetime desc;
+
+-- name: RobotSensorSearchByAccountAndBetween :many
+SELECT * FROM robot_sensor WHERE id_robot IN (sqlc.slice("id_robot")) AND collection_datetime BETWEEN (?) AND (?) ORDER BY `collection_datetime` DESC;
 
 -- name: RobotSensorSearchByAccountScreen :many
 SELECT *
 FROM robot_sensor
 WHERE id_robot = ?
 order by collection_datetime desc limit 6;
+

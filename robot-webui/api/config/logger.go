@@ -1,4 +1,4 @@
-package common
+package config
 
 import (
 	"github.com/sirupsen/logrus"
@@ -20,5 +20,5 @@ func InitLogger() {
 	})
 
 	//设置日志输出等级
-	MyLogger.SetLevel(logrus.DebugLevel)
+	MyLogger.SetLevel(LoggerLever)
 }

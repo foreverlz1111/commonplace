@@ -1,7 +1,7 @@
 package server
 
 import (
-	"api/common"
+	"api/config"
 	"api/dboutput"
 	"context"
 	"golang.org/x/crypto/bcrypt"
@@ -25,7 +25,7 @@ func (Accountf *AccountServerFunc) GetUserTable(idaccount, pwdaccount string) db
 func (Accountf *AccountServerFunc) GetUserByID(idaccount string) dboutput.AccountInfo {
 	result, err := MysqlDB.AccountSearchByID(context.Background(), idaccount)
 	if err == nil && result.IDAccount != "" {
-		common.MyLogger.Debugf("找到用户信息 %v", result)
+		config.MyLogger.Debugf("找到用户信息 %v", result)
 		return result
 	}
 	return dboutput.AccountInfo{}
@@ -47,14 +47,14 @@ func (Accountf *AccountServerFunc) RegisterUser(args dboutput.AccountInfo) bool 
 		RemarkAccount:         args.RemarkAccount,
 	})
 	if err != nil {
-		common.MyLogger.Debugf("注册失败：%v", err)
+		config.MyLogger.Debugf("注册失败：%v", err)
 		return false
 	}
 	rowsaffect, err := result.RowsAffected()
 	if err != nil {
-		common.MyLogger.Debugf("获取不到 RowsAffected()  %v", err)
+		config.MyLogger.Debugf("获取不到 RowsAffected()  %v", err)
 	}
-	common.MyLogger.Debugf("注册成功，插入信息行数: %v", rowsaffect)
+	config.MyLogger.Debugf("注册成功，插入信息行数: %v", rowsaffect)
 	return true
 }
 
@@ -73,7 +73,7 @@ func EnCoder(password string) []byte {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		common.MyLogger.Debugf("hashedPassword", hashedPassword)
+		config.MyLogger.Debugf("hashedPassword", hashedPassword)
 		return nil
 	}
 	return hashedPassword
@@ -83,7 +83,7 @@ func EnCoder(password string) []byte {
 func DeCoder(hashpassword, password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashpassword), []byte(password))
 	if err != nil {
-		common.MyLogger.Debugf("hashed Password 生成失败，密码错误: ", err)
+		config.MyLogger.Debugf("hashed Password 生成失败，密码错误: ", err)
 		return false
 	} else {
 		return true
