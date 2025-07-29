@@ -246,16 +246,17 @@ export default function Envrobot({}) {
         setAnchorEl(null);
     };
     const extractValidData = (data) => {
+        console.log("data", data);
         return {
             id: data.ID,
             collection_datetime: data.CollectionDatetime,
             id_robot: data.IDRobot,
-            sf6: data.CollectionSF6.Valid ? data.CollectionSF6.Float64 : "N/A",
+            sf6: data.CollectionSf6.Valid ? data.CollectionSf6.Float64 : "N/A",
             humid: data.CollectionHumidity.Valid ? data.CollectionHumidity.Float64 : "N/A",
             temp: data.CollectionTemperature.Valid ? data.CollectionTemperature.Float64 : "N/A",
             noice: data.CollectionNoise.Valid ? data.CollectionNoise.Float64 : "N/A",
-            nh: data.CollectionNH.Valid ? data.CollectionNH.Float64 : "N/A",
-            so2: data.CollectionSO2.Valid ? data.CollectionSO2.Float64 : "N/A",
+            nh: data.CollectionNh.Valid ? data.CollectionNh.Float64 : "N/A",
+            so2: data.CollectionSo2.Valid ? data.CollectionSo2.Float64 : "N/A",
         };
     }
     const getMyRobotSensorEnv = async (id_account) => {

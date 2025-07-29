@@ -29,6 +29,7 @@ import Envrobot from "./Envrobot";
 import Pigface from "./Pigface";
 import Screen from "./Screen";
 import {useRouter} from "next/router";
+import GrowthModel from "./Mymodel";
 
 const drawerWidth = 240;
 
@@ -235,6 +236,9 @@ export default function Main() {
                     )}
                     {selectedPage === "展示大屏" && (
                         <Screen></Screen>
+                    )}
+                    {selectedPage === "生长模型" && (
+                        <GrowthModel></GrowthModel>
                     )}
                 </Box>
             </Box>

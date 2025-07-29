@@ -175,7 +175,7 @@ export default function StatusRobot() {
         </Box>
         <Paper
             sx={{
-                m: 2, mt: 0, p: 1, display: 'flex', flexDirection: 'row', minHeight: "80vh",
+                m: 2, mt: 2, p: 1, display: 'flex', flexDirection: 'row', minHeight: "80vh",
 
             }}
         >
@@ -186,7 +186,6 @@ export default function StatusRobot() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', // 垂直排列
                     borderRight: '1px solid #ccc', // 可选：添加分隔线
                     bgcolor: "",
-
                 }}
             >
                 <Box

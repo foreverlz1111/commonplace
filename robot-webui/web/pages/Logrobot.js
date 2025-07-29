@@ -175,8 +175,7 @@ EnhancedTableToolbar.propTypes = {
 };
 export default function Logrobot({}) {
     const [rows, setRows] = React.useState([]);
-
-        const [order, setOrder] = React.useState('desc');
+    const [order, setOrder] = React.useState('desc');
     const [orderBy, setOrderBy] = React.useState('collection_datetime');
     const [selected, setSelected] = React.useState([]);
     const [page, setPage] = React.useState(0);
@@ -249,9 +248,9 @@ export default function Logrobot({}) {
             id_robot: data.IDRobot,
             map: data.StatusNavigatingmap.Valid ? data.StatusNavigatingmap.String : "N/A",
             mission: data.StatusNavigatingtask.Valid ? data.StatusNavigatingtask.String : "N/A",
-            map2d: data.Status2DMApping.Valid ? data.Status2DMApping.String : "N/A",
-            map3d: data.Status3DMApping.Valid ? data.Status3DMApping.String : "N/A",
-            sensor: data.StatusSensorIsOpen.Valid ? data.StatusSensorIsOpen.Bool : "N/A",
+            map2d: data.Status2dmapping.Valid ? data.Status2dmapping.String : "N/A",
+            map3d: data.Status3dmapping.Valid ? data.Status3dmapping.String : "N/A",
+            sensor: data.StatusSensorIsopen.Valid ? data.StatusSensorIsopen.Bool : "N/A",
         };
     }
     const getRobotCurrentAll = async (id_account) => {

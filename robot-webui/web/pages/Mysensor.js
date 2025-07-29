@@ -21,15 +21,11 @@ import Switch from '@mui/material/Switch';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import {visuallyHidden} from '@mui/utils';
 import Button from "@mui/material/Button";
-import {Refresh, SmartToy} from "@mui/icons-material";
-import TextField from "@mui/material/TextField";
+import {Refresh} from "@mui/icons-material";
 import {DatePicker, LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from "dayjs";
 import {useEffect, useState} from "react";
-import {NextResponse as response} from "next/server";
 import {CircularProgress} from "@mui/material";
-import {useRef} from 'react';
 
 function createData(id, collection_datetime, id_robot, collection_imu, collection_lidar_2d, collection_lidar_3d, collection_rgb, collection_thermal, collection_depth) {
     return {
@@ -263,10 +259,10 @@ export default function Mysensor({}) {
             id: data.ID,
             collection_datetime: data.CollectionDatetime,
             id_robot: data.IDRobot,
-            collection_imu: data.CollectionIMU.Valid ? data.CollectionIMU.String : "N/A",
-            collection_lidar_2d: data.CollectionLidar2D.Valid ? data.CollectionLidar2D.String : "N/A",
-            collection_lidar_3d: data.CollectionLidar3D.Valid ? data.CollectionLidar3D.String : "N/A",
-            collection_rgb: data.CollectionRGB.Valid ? data.CollectionRGB.String : "N/A",
+            collection_imu: data.CollectionImu.Valid ? data.CollectionImu.String : "N/A",
+            collection_lidar_2d: data.CollectionLidar2d.Valid ? data.CollectionLidar2d.String : "N/A",
+            collection_lidar_3d: data.CollectionLidar3d.Valid ? data.CollectionLidar3d.String : "N/A",
+            collection_rgb: data.CollectionRgb.Valid ? data.CollectionRgb.String : "N/A",
             collection_thermal: data.CollectionThermal.Valid ? data.CollectionThermal.String : "N/A",
             collection_depth: data.CollectionDepth.Valid ? data.CollectionDepth.String : "N/A"
         };

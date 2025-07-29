@@ -6,8 +6,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import ViewCarousel from "@mui/icons-material/ViewCarousel"
@@ -141,117 +139,117 @@ export default function Index() {
         }
         autologin()
     },[])
-    // return (<ThemeProvider theme={defaultTheme}>
-    //     <Grid container component="main" sx={{height: '100vh'}}>
-    //         <CssBaseline/>
-    //         <Grid
-    //             item
-    //             xs={false}
-    //             sm={4}
-    //             md={7}
-    //             sx={{
-    //                 backgroundImage: 'url("images/login_bg.png")',
-    //                 backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-    //                 backgroundSize: 'cover',
-    //                 backgroundPosition: 'left',
-    //             }}
-    //         />
-    //         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-    //             <Box
-    //                 sx={{
-    //                     my: 8, mx: 4, display: 'flex', flexDirection: 'column', alignItems: 'center',
-    //                 }}
-    //             >
-    //                 <Box sx={{display: 'flex', alignItems: 'center'}}>
-    //                     <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
-    //                         <ViewCarousel/>
-    //                     </Avatar>
-    //                     <Typography component="h1" variant="h5">
-    //                         机器人管理后台
-    //                     </Typography>
-    //                 </Box>
-    //                 <Box component="form" noValidate onSubmit={handleLogin} sx={{mt: 1}}>
-    //                     <TextField
-    //                         margin="normal"
-    //                         required
-    //                         fullWidth
-    //                         id="id_account"
-    //                         label="登录名"
-    //                         name="id_account"
-    //                         autoComplete="email"
-    //                         autoFocus
-    //                         value={idAccount}
-    //                         onChange={(e) => setIdAccount(e.target.value)}
-    //                         error={!!idAccountError || !!globalError}
-    //                         helperText={idAccountError || globalError}
-    //                     />
-    //                     <TextField
-    //                         margin="normal"
-    //                         required
-    //                         fullWidth
-    //                         name="pwd_account"
-    //                         label="密码"
-    //                         type="password"
-    //                         id="pwd_account"
-    //                         autoComplete="current-password"
-    //                         value={pwdAccount}
-    //                         onChange={(e) => setPwdAccount(e.target.value)}
-    //                         error={!!pwdAccountError || !!globalError}
-    //                         helperText={pwdAccountError || globalError}
-    //                     />
-    //                     {/*<FormControlLabel*/}
-    //                     {/*    control={<Checkbox value="remember" color="primary"/>}*/}
-    //                     {/*    label="记住密码"*/}
-    //                     {/*/>*/}
-    //                     <Button
-    //                         type="submit"
-    //                         fullWidth
-    //                         variant="contained"
-    //                         sx={{mt: 3, mb: 2, position: 'relative'}}
-    //                         disabled={loginLoading}
-    //                     >
-    //                         {loginLoading && (<CircularProgress
-    //                             size={24}
-    //                             sx={{
-    //                                 position: 'absolute',
-    //                                 top: '50%',
-    //                                 left: '60%',
-    //                                 marginTop: '-12px',
-    //                                 marginLeft: '-12px',
-    //                             }}
-    //                         />)}
-    //                         {!loginLoading && (<span>登录</span>)}
-    //                         {loginLoading && (<span>登录中</span>)}
-    //                     </Button>
-    //                     {/*<Grid container>*/}
-    //                     {/*    <Grid item xs>*/}
-    //                     {/*        <Link href="#" variant="body2">*/}
-    //                     {/*            忘记密码*/}
-    //                     {/*        </Link>*/}
-    //                     {/*    </Grid>*/}
-    //                     {/*</Grid>*/}
-    //                     <Grid container justifyContent="right">
-    //                         <Grid item>
-    //                             <Link href="#">
-    //                                 <Box sx={{display: 'flex', alignItems: 'center'}}>
-    //                                     <Avatar sx={{bgcolor: 'secondary.main', height: 17, width: 17}}>
-    //                                         <TurnRight sx={{fontSize: 15}}/>
-    //                                     </Avatar>
-    //                                     生猪健康管理后台
-    //                                 </Box>
-    //                             </Link>
-    //                         </Grid>
-    //                     </Grid>
-    //                     <Grid container justifyContent="center">
-    //                         <Copyright sx={{
-    //                             position: 'absolute', // 绝对定位在父容器底部
-    //                             bottom: 0, textAlign: 'center',
-    //                             mb: 4
-    //                         }}/>
-    //                     </Grid>
-    //                 </Box>
-    //             </Box>
-    //         </Grid>
-    //     </Grid>
-    // </ThemeProvider>);
+    return (<ThemeProvider theme={defaultTheme}>
+        <Grid container component="main" sx={{height: '100vh'}}>
+            <CssBaseline/>
+            <Grid
+                item
+                xs={false}
+                sm={4}
+                md={7}
+                sx={{
+                    backgroundImage: 'url("images/login_bg.png")',
+                    backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'left',
+                }}
+            />
+            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+                <Box
+                    sx={{
+                        my: 8, mx: 4, display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    }}
+                >
+                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                        <Avatar sx={{m: 1, bgcolor: 'secondary.main'}}>
+                            <ViewCarousel/>
+                        </Avatar>
+                        <Typography component="h1" variant="h5">
+                            机器人管理后台
+                        </Typography>
+                    </Box>
+                    <Box component="form" noValidate onSubmit={handleLogin} sx={{mt: 1}}>
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            id="id_account"
+                            label="登录名"
+                            name="id_account"
+                            autoComplete="email"
+                            autoFocus
+                            value={idAccount}
+                            onChange={(e) => setIdAccount(e.target.value)}
+                            error={!!idAccountError || !!globalError}
+                            helperText={idAccountError || globalError}
+                        />
+                        <TextField
+                            margin="normal"
+                            required
+                            fullWidth
+                            name="pwd_account"
+                            label="密码"
+                            type="password"
+                            id="pwd_account"
+                            autoComplete="current-password"
+                            value={pwdAccount}
+                            onChange={(e) => setPwdAccount(e.target.value)}
+                            error={!!pwdAccountError || !!globalError}
+                            helperText={pwdAccountError || globalError}
+                        />
+                        {/*<FormControlLabel*/}
+                        {/*    control={<Checkbox value="remember" color="primary"/>}*/}
+                        {/*    label="记住密码"*/}
+                        {/*/>*/}
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            sx={{mt: 3, mb: 2, position: 'relative'}}
+                            disabled={loginLoading}
+                        >
+                            {loginLoading && (<CircularProgress
+                                size={24}
+                                sx={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '60%',
+                                    marginTop: '-12px',
+                                    marginLeft: '-12px',
+                                }}
+                            />)}
+                            {!loginLoading && (<span>登录</span>)}
+                            {loginLoading && (<span>登录中</span>)}
+                        </Button>
+                        {/*<Grid container>*/}
+                        {/*    <Grid item xs>*/}
+                        {/*        <Link href="#" variant="body2">*/}
+                        {/*            忘记密码*/}
+                        {/*        </Link>*/}
+                        {/*    </Grid>*/}
+                        {/*</Grid>*/}
+                        <Grid container justifyContent="right">
+                            <Grid item>
+                                <Link href="#">
+                                    <Box sx={{display: 'flex', alignItems: 'center'}}>
+                                        <Avatar sx={{bgcolor: 'secondary.main', height: 17, width: 17}}>
+                                            <TurnRight sx={{fontSize: 15}}/>
+                                        </Avatar>
+                                        生猪健康管理后台
+                                    </Box>
+                                </Link>
+                            </Grid>
+                        </Grid>
+                        <Grid container justifyContent="center">
+                            <Copyright sx={{
+                                position: 'absolute', // 绝对定位在父容器底部
+                                bottom: 0, textAlign: 'center',
+                                mb: 4
+                            }}/>
+                        </Grid>
+                    </Box>
+                </Box>
+            </Grid>
+        </Grid>
+    </ThemeProvider>);
 }

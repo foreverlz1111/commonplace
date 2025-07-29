@@ -4,7 +4,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import ListSubheader from '@mui/material/ListSubheader';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import {Adb, DeviceThermostat, Dvr, LocalSee, Savings, StickyNote2} from "@mui/icons-material";
+import {Adb, DeviceThermostat, Dvr, LegendToggle, LocalSee, Savings, StickyNote2} from "@mui/icons-material";
 
 export const mainListItems = (handlePageChange)=>(
     <React.Fragment>
@@ -55,6 +55,12 @@ export const thirdListItems =(handlePageChange)=> (
                 <Savings/>
             </ListItemIcon>
             <ListItemText primary="生猪画像"/>
+        </ListItemButton>
+        <ListItemButton onClick={()=>handlePageChange("生长模型")}>
+            <ListItemIcon>
+                <LegendToggle/>
+            </ListItemIcon>
+            <ListItemText primary="生长模型"/>
         </ListItemButton>
     </React.Fragment>
 );
