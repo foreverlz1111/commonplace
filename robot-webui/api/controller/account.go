@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-var acountserver server.AccountServerFunc
+var accountServerFunc server.AccountServerFunc
 
 // RegisterHandler 注册用户
 func RegisterHandler(c *gin.Context) {
@@ -28,7 +28,7 @@ func RegisterHandler(c *gin.Context) {
 	config.MyLogger.Debugf("valueIdAccount: %v", valueIdAccount)
 	config.MyLogger.Debugf("valuePwdAccount: %v", valuePwdAccount)
 
-	userinfo := acountserver.GetUserByID(valueIdAccount)
+	userinfo := accountServerFunc.GetUserByID(valueIdAccount)
 
 	if userinfo.IDAccount == "" {
 		if valuePwdAccount == "" {
@@ -39,7 +39,7 @@ func RegisterHandler(c *gin.Context) {
 			config.MyLogger.Errorf("生成加密密码失败")
 		}
 		config.MyLogger.Debugf("pwdaccountstr: %v", pwdaccountstr)
-		if acountserver.RegisterUser(dboutput.AccountInfo{
+		if accountServerFunc.RegisterUser(dboutput.AccountInfo{
 			IDAccount:             valueIdAccount,
 			PwdAccount:            pwdaccountstr,
 			TypeAccount:           "1",
@@ -89,7 +89,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	// 验证用户
-	userinfo := acountserver.GetUserByID(valueIdAccount)
+	userinfo := accountServerFunc.GetUserByID(valueIdAccount)
 
 	// 确有此人
 	if userinfo.IDAccount != "" {
