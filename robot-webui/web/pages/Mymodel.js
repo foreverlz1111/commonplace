@@ -2,49 +2,192 @@ import Typography from "@mui/material/Typography";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
 import {FormControl, InputLabel, MenuItem, Select} from "@mui/material";
-import {LineChart} from "@mui/x-charts";
+import {LineChart, ScatterChart} from "@mui/x-charts";
 import Paper from "@mui/material/Paper";
 import * as React from 'react';
 import {DataGrid} from '@mui/x-data-grid';
+import {useEffect, useState} from "react";
+import {cssFileResolve} from "next/dist/build/webpack/config/blocks/css/loaders/file-resolve";
+import * as Papa from "date-fns";
+import process from "next/dist/build/webpack/loaders/resolve-url-loader/lib/postcss";
 
+async function getCsv4DataGrid(fileName) {
+    // 拉取文本
+    const response = await fetch(fileName);
+    if (!response.ok) {
+        throw new Error(`无法加载文件：${response.status} ${response.statusText}`);
+    }
+    const text = await response.text();
 
-function useData(rowLength, columnLength) {
-    const [data, setData] = React.useState({columns: [], rows: []});
+    // 拆分非空行
+    const lines = text
+        .trim()
+        .split(/\r?\n/)
+        .filter(line => line.trim().length > 0);
 
-    React.useEffect(() => {
-        const rows = [];
+    if (lines.length < 1) {
+        return {rows: [], columns: []};
+    }
 
-        for (let i = 0; i < rowLength; i += 1) {
-            const row = {
-                id: i,
-            };
+    // 自动检测分隔符
+    const headerLine = lines[0];
+    const delimiter = headerLine.includes(',')
+        ? ','
+        : headerLine.includes('\t')
+            ? '\t'
+            : ','; // 默认逗号
 
-            for (let j = 1; j <= columnLength; j += 1) {
-                row[`price${j}M`] = `${i.toString()}, ${j} `;
-            }
+    // 解析表头
+    const headers = headerLine.split(delimiter).map(h => h.trim());
 
-            rows.push(row);
-        }
+    // 构造 columns 数组
+    const columns = headers.map(header => ({
+        field: header,
+        headerName: header,  // 你也可以在这里做映射，比如去掉单位后缀等
+    }));
 
-        const columns = [];
-
-        for (let j = 1; j <= columnLength; j += 1) {
-            columns.push({field: `price${j}M`, headerName: `${j}M`});
-        }
-
-        setData({
-            rows, columns,
+    // 构造 rows 数组
+    const rows = lines.slice(1).map((line, idx) => {
+        const values = line.split(delimiter).map(v => v.trim());
+        const row = {id: idx};
+        headers.forEach((header, i) => {
+            row[header] = values[i] || '';
         });
-    }, [rowLength, columnLength]);
-    return data;
+        return row;
+    });
+
+    return {rows, columns};
+}
+
+async function getCsv4LineChart(fileName) {
+    // 拉取文本
+    const response = await fetch(fileName);
+    if (!response.ok) {
+        throw new Error(`无法加载文件：${response.status} ${response.statusText}`);
+    }
+    const text = await response.text();
+    const lines = text
+        .trim()
+        .split(/\r?\n/)
+        .filter(line => line.trim().length > 0);
+
+    if (lines.length <= 1) {
+        return {x: [], y: []};
+    }
+
+    // 自动检测分隔符（逗号或制表符）
+    const delimiter = lines[0].includes(',') ? ',' : lines[0].includes('\t') ? '\t' : ',';
+
+    const x = [];
+    const y = [];
+    lines.slice(1).forEach(line => {
+        // 按逗号、制表符或空格任一分隔
+        const parts = line.trim().split(/[\s,\t]+/);
+        const xs = parts[0] ?? '';
+        const ys = parts[1] ?? '';
+        const xv = Number(xs);
+        const yv = Number(ys);
+        x.push(isNaN(xv) ? xs : xv);
+        y.push(isNaN(yv) ? ys : yv);
+    });
+
+
+    return {xvalue: x, yvalue: y};
+
+}
+
+/**
+ * 根据多项式回归系数评估拟合曲线
+ * 传入系数数组 coefs = [a0, a1, ..., an], y = a0 + a1*x + ... + an*x^n
+ */
+export function evaluatePolynomial(x, coefs) {
+    return x.map(xi =>
+        coefs.reduce((sum, coef, idx) => sum + coef * Math.pow(xi, idx), 0)
+    );
+}
+
+/**
+ * 生成用于 XUI Chart 的数据格式
+ * 输入 x 数组和多项式系数，返回 [{ x: ..., y: ... }, ...]
+ */
+export function getPolynomialSeries(x, coefs) {
+    const yFit = evaluatePolynomial(x, coefs);
+    return x.map((xi, i) => ({x: xi, y: yFit[i]}));
+}
+
+/**
+ * 复杂多项式函数 y = -3.636*10^-5*x^4 + 0.009029*x^3 - 0.7297*x^2 + 29.99*x + 1627
+ */
+export function complexPolynomial(x) {
+    // 使用科学计数法表示系数
+    return (
+        -3.636e-5 * Math.pow(x, 4) +
+        0.009029 * Math.pow(x, 3) -
+        0.7297 * Math.pow(x, 2) +
+        29.99 * x +
+        1627
+    );
+}
+
+/**
+ * 生成满足 XUI Chart 的复杂多项式数据序列
+ * 输入 x 数组，返回 [{ x: ..., y: complexPolynomial(x) }, ...]
+ */
+export function getComplexPolynomialSeries(x) {
+    return x.map(xi => ({x: xi, y: complexPolynomial(xi)}));
 }
 
 export default function GrowthModel({}) {
-    const [selectedModel, setSelectModel] = React.useState('');
+    const [csvModelPath, setCsvModelPath] = React.useState('');
     const handleSelectModelChange = (event) => {
-        setSelectModel(event.target.value);
+        setCsvModelPath(event.target.value);
+        console.log(csvMap[csvModelIndex])
+        updateChart(event.target.value);
     }
-    const data = useData(100, 1000);
+    const [csvModelIndex, setCsvModelIndex] = React.useState(0);
+    const [csvModelName, setCsvModelName] = React.useState('');
+
+    const [csvMap, setCsvMap] = useState({});
+    const [XValue, setXValue] = React.useState([]);
+    const [YValue, setYValue] = React.useState([]);
+    const [Rows, setRows] = React.useState([]);
+    const [Columns, setColumns] = React.useState([]);
+
+    async function updateChart(csv_path) {
+        try {
+            const {xvalue, yvalue} = await getCsv4LineChart(csv_path[0]);
+
+            const {rows, columns} = await getCsv4DataGrid(csv_path[1]);
+            // console.log(rows, columns);
+            // console.log(xvalue, yvalue);
+            setRows(rows);
+            setColumns(columns);
+            setXValue(xvalue);
+            setYValue(yvalue);
+            console.log();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    useEffect(() => {
+        fetch("/models_csv.json")
+            .then((res) => res.json())
+            .then((data) => {
+                setCsvMap(data);
+                // console.log(Object.values(data));//=="x.csv"
+                // console.log(Object.keys(data));//=="xx模型"
+                const initSelectKeys = Object.keys(data)[0];
+                if (initSelectKeys) {
+                    setCsvModelName(initSelectKeys);
+                }
+                const initSelectModelPath = Object.values(data)[0];
+                if (initSelectModelPath) {
+                    setCsvModelPath(initSelectModelPath);
+                }
+                updateChart(initSelectModelPath);
+            })
+    }, []);
 
     return (<Box>
         <Toolbar/>
@@ -57,29 +200,32 @@ export default function GrowthModel({}) {
             <Typography variant="h6" sx={{mr: 2}}>
                 选择模型：
             </Typography>
-            <FormControl variant="outlined" size="small" sx={{minWidth: 200}}>
-                <InputLabel id="robot-select-label">model</InputLabel>
+            <FormControl variant="outlined" size="small" sx={{minWidth: 300}}>
+                {/*<InputLabel id="robot-select-label">model</InputLabel>*/}
                 <Select
                     variant="standard"
                     labelId="robot-select-label"
                     id="robot-select"
-                    value={selectedModel}
+                    value={csvModelPath}
                     onChange={handleSelectModelChange}
                     label="model"
                 >
-                    {/*<MenuItem value="robot1">null</MenuItem>*/}
-                    {selectedModel.length === 0 ? (<MenuItem value="">
-                        <em>暂无模型</em>
-                    </MenuItem>) : (<MenuItem value="">
+                    {csvMap.length === 0 ? (
+                        <MenuItem value="">
                             <em>暂无模型</em>
-                        </MenuItem>
-                        // selectedModel.map((robot, index) => (
-                        //     <MenuItem key={index} value={robot}>
-                        //         {robot}
-                        //     </MenuItem>
-                        // )
-                        // )
+                        </MenuItem>) : (
+                        Object.entries(csvMap).map(([name, path], index) => (
+                            <MenuItem key={index} value={path} onClick={() => {
+                                setCsvModelIndex(index)
+                                setCsvModelName(name)
+                            }}>
+                                {/*{index}*/}
+                                {name}
+                                {/*{path}*/}
+                            </MenuItem>
+                        ))
                     )}
+
                 </Select>
             </FormControl>
         </Box>
@@ -96,18 +242,31 @@ export default function GrowthModel({}) {
                     m: 2, p: 2, border: '1px solid black', overflow: 'auto',
                 }}
             >
-                <Box sx={{mb: 0}}>
-                    <Typography variant="h6">模型展示图：</Typography>
+                <Box sx={{ml: 0}}>
+                    <Typography variant="h6">模型测试图：</Typography>
+                </Box>
+                <Box sx={{ml: 0}}>
+                    <LineChart
+                        title="title"
+                        xAxis={[{
+                            data: XValue,
+                            label: "实际值" + (Object.keys(csvMap).length > 0 ? csvMap[csvModelName][2] : "0"),
+                            shape: 'diamond',
+                            showToolbar: true
+                        }]}
+                        series={[{
+                            data: YValue,
+                            label: "预测值" + (Object.keys(csvMap).length > 0 ? csvMap[csvModelName][3] : "0"),
+                            curve: "monotoneY",
+                            shape: 'diamond',
+                            connectNulls: false,
+                        },]}
+
+                        height={300}
+                    />
                 </Box>
 
 
-                <LineChart
-                    xAxis={[{data: [1, 2, 3, 5, 8, 10]}]}
-                    series={[{
-                        data: [2, 5.5, 2, 8.5, 1.5, 5],
-                    },]}
-                    height={300}
-                />
             </Box>
             <Box
                 sx={{
@@ -115,9 +274,9 @@ export default function GrowthModel({}) {
                     m: 2, p: 2, border: '1px solid gray',
                 }}
             >
-                <Typography variant="h6">模型数据：</Typography>
+                <Typography variant="h6">模型训练数据：</Typography>
                 <div style={{height: 400, width: '100%'}}>
-                    <DataGrid {...data} columnBuffer={2} columnThreshold={2}/>
+                    <DataGrid columns={Columns} rows={Rows} columnBuffer={2} columnThreshold={2}/>
                 </div>
             </Box>
         </Paper>
