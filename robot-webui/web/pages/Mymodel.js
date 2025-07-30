@@ -91,50 +91,8 @@ async function getCsv4LineChart(fileName) {
         y.push(isNaN(yv) ? ys : yv);
     });
 
-
     return {xvalue: x, yvalue: y};
 
-}
-
-/**
- * 根据多项式回归系数评估拟合曲线
- * 传入系数数组 coefs = [a0, a1, ..., an], y = a0 + a1*x + ... + an*x^n
- */
-export function evaluatePolynomial(x, coefs) {
-    return x.map(xi =>
-        coefs.reduce((sum, coef, idx) => sum + coef * Math.pow(xi, idx), 0)
-    );
-}
-
-/**
- * 生成用于 XUI Chart 的数据格式
- * 输入 x 数组和多项式系数，返回 [{ x: ..., y: ... }, ...]
- */
-export function getPolynomialSeries(x, coefs) {
-    const yFit = evaluatePolynomial(x, coefs);
-    return x.map((xi, i) => ({x: xi, y: yFit[i]}));
-}
-
-/**
- * 复杂多项式函数 y = -3.636*10^-5*x^4 + 0.009029*x^3 - 0.7297*x^2 + 29.99*x + 1627
- */
-export function complexPolynomial(x) {
-    // 使用科学计数法表示系数
-    return (
-        -3.636e-5 * Math.pow(x, 4) +
-        0.009029 * Math.pow(x, 3) -
-        0.7297 * Math.pow(x, 2) +
-        29.99 * x +
-        1627
-    );
-}
-
-/**
- * 生成满足 XUI Chart 的复杂多项式数据序列
- * 输入 x 数组，返回 [{ x: ..., y: complexPolynomial(x) }, ...]
- */
-export function getComplexPolynomialSeries(x) {
-    return x.map(xi => ({x: xi, y: complexPolynomial(xi)}));
 }
 
 export default function GrowthModel({}) {
