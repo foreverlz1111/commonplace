@@ -246,7 +246,6 @@ export default function Envrobot({}) {
         setAnchorEl(null);
     };
     const extractValidData = (data) => {
-        console.log("data", data);
         return {
             id: data.ID,
             collection_datetime: data.CollectionDatetime,
@@ -269,7 +268,7 @@ export default function Envrobot({}) {
             })
             if (response.status === 200) {
                 const data = await response.json();
-                console.log('获取我的机器人传感器信息成功:', data);
+                // console.log('获取我的机器人传感器信息成功:', data);
                 const processedRows = data.map(item => {
                     const processedData = extractValidData(item);
                     return createData(

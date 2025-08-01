@@ -255,7 +255,7 @@ export default function Logrobot({}) {
     }
     const getRobotCurrentAll = async (id_account) => {
         try {
-            console.log(sessionStorage.getItem('token'));
+            // console.log(sessionStorage.getItem('token'));
             const response = await fetch(`/api/robotcurrentall?id_account=${id_account}`, {
                 method: 'GET',
                 headers: {
@@ -265,7 +265,7 @@ export default function Logrobot({}) {
             })
             if (response.status === 200) {
                 const data = await response.json();
-                console.log('获取我的机器人全部信息成功:', data);
+                // console.log('获取我的机器人全部信息成功:', data);
                 const processedRows = data.map(item => {
                     const processedData = extractValidData(item);
                     return createData(

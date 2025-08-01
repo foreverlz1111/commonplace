@@ -287,7 +287,7 @@ export default function Mysensor({}) {
                 if (response.status === 200) {
                     const data = await response.json();
                     if (Array.isArray(data)) {
-                        console.log('根据日期 获取我的机器人传感器信息成功:', data);
+                        // console.log('根据日期 获取我的机器人传感器信息成功:', data);
                         const processedRows = data.map(item => {
                             const processedData = extractValidData(item);
                             return createData(

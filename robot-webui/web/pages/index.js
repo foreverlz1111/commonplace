@@ -69,7 +69,7 @@ export default function Index() {
             });
             if (response.status === 200) {
                 const data = await response.json(); // 解析 JSON 数据
-                console.log('Login successful:', data);
+                // console.log('Login successful:', data);
                 // localStorage: 存储的数据不会过期，除非手动清除（如通过 JavaScript 或清除浏览器缓存）。
                 // sessionStorage: 存储的数据只在浏览器会话期间有效，当用户关闭浏览器或标签页时，数据会被清除。
 

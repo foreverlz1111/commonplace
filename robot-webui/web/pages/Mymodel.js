@@ -99,7 +99,7 @@ export default function GrowthModel({}) {
     const [csvModelPath, setCsvModelPath] = React.useState('');
     const handleSelectModelChange = (event) => {
         setCsvModelPath(event.target.value);
-        console.log(csvMap[csvModelIndex])
+        // console.log(csvMap[csvModelIndex])
         updateChart(event.target.value);
     }
     const [csvModelIndex, setCsvModelIndex] = React.useState(0);
@@ -122,7 +122,6 @@ export default function GrowthModel({}) {
             setColumns(columns);
             setXValue(xvalue);
             setYValue(yvalue);
-            console.log();
         } catch (err) {
             console.error(err);
         }

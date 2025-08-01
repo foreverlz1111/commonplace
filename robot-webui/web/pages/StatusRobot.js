@@ -36,7 +36,7 @@ export default function StatusRobot() {
 
             if (response.status === 200) {
                 const data = await response.json();
-                console.log('获取机器人信息成功:', data);
+                // console.log('获取机器人信息成功:', data);
                 setRobotInfo(data);
             } else {
                 const errorData = await response.json();
@@ -59,7 +59,7 @@ export default function StatusRobot() {
 
             if (response.status === 200) {
                 const data = await response.json();
-                console.log('获取机器人状态成功:', data);
+                // console.log('获取机器人状态成功:', data);
                 setRobotStatus(data.robotstatus);
                 setRobotVersion(data.robotversion)
             } else {
@@ -77,7 +77,7 @@ export default function StatusRobot() {
             // 在延迟后执行异步操作
             getRobotCurrent(selectedRobot)
                 .then((e) => {
-                    console.log('err:', e);
+                    console.log('错误:', e);
                 })
                 .catch((error) => {
                     console.error('获取机器人状态失败:', error);
@@ -85,7 +85,7 @@ export default function StatusRobot() {
 
             getRobotInfo(selectedRobot)
                 .then((e) => {
-                    console.log('err:', e);
+                    console.log('错误:', e);
                 })
                 .catch((error) => {
                     console.error('获取机器人信息失败:', error);

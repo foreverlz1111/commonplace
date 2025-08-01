@@ -34,7 +34,7 @@ export const fetchImageUrl = async (filename) => {
 
         if (response.ok) {
             const data = await response.json();
-            console.log("get ossurl",data.ossurl)
+            // console.log("Get oss url",data.ossurl)
             return data.ossurl;
         } else {
             console.error("Failed to fetch image URL");
@@ -247,7 +247,6 @@ export default function Pigface() {
             });
             if (response.status === 200) {
                 const data = await response.json();
-
                 setRows(data);
             }
         } catch (error) {

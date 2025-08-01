@@ -48,7 +48,7 @@ export default function Screen() {
             // 在延迟后执行异步操作
             getRobotCurrent(selectedRobot)
                 .then((e) => {
-                    console.log('e:', e);
+                    // console.log('e:', e);
                 })
                 .catch((error) => {
                     console.error('获取机器人状态失败:', error);
@@ -56,7 +56,7 @@ export default function Screen() {
 
             getRobotSensor(selectedRobot)
                 .then((e) => {
-                    console.log('e:', e);
+                    // console.log('e:', e);
                 })
                 .catch((error) => {
                     console.error('获取机器人信息失败:', error);
@@ -91,7 +91,7 @@ export default function Screen() {
 
             if (response.status === 200) {
                 const data = await response.json();
-                console.log('获取机器人状态成功:', data);
+                // console.log('获取机器人状态成功:', data);
                 setRobotCurrent(data.robotstatus);
             } else {
                 const errorData = await response.json();
